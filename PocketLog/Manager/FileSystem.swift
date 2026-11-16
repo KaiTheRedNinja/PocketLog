@@ -11,17 +11,29 @@ enum FileSystem {
     static func write<T: Encodable>(value: T, to file: File) throws {
         let encoder = JSONEncoder()
         let data = try encoder.encode(value)
-        try data.write(to: directory(for: file))
+        try data.write(to: path(for: file))
     }
 
     static func read<T: Decodable>(type _: T.Type = T.self, from file: File) throws -> T {
         let decoder = JSONDecoder()
-        let data = try Data(contentsOf: directory(for: file))
+        let data = try Data(contentsOf: path(for: file))
         let value = try decoder.decode(T.self, from: data)
         return value
     }
 
-    static func directory(for file: File) -> URL {
+    static func delete(_ file: File) throws {
+        try FileManager.default.removeItem(at: path(for: file))
+    }
+
+    static func create(dir: File) throws {
+        try FileManager.default.createDirectory(at: path(for: dir), withIntermediateDirectories: true)
+    }
+
+    static func contents(of dir: File) throws -> [String] {
+        try FileManager.default.contentsOfDirectory(atPath: path(for: dir).path())
+    }
+
+    static func path(for file: File) -> URL {
         docsDir().appendingPathComponent(file.path)
     }
 
@@ -32,11 +44,19 @@ enum FileSystem {
 }
 
 enum File {
-    case directory
+    case root
+    case recordingsDir
+    case recording(name: String)
+    case renames
+    case arbitrary(path: String)
 
     var path: String {
         switch self {
-        case .directory: "directory.json"
+        case .root: ""
+        case .recordingsDir: "recordings/"
+        case .recording(let name): "recordings/\(name)"
+        case .renames: "renames.json"
+        case .arbitrary(let path): path
         }
     }
 }

@@ -26,6 +26,13 @@ class AudioManager: NSObject {
             return
         }
 
+        do {
+            try FileSystem.create(dir: .recordingsDir)
+        } catch {
+            print("Could not create recordings directory")
+            return
+        }
+
         recordingSession = AVAudioSession.sharedInstance()
         do {
             // Set the audio session category and mode.
@@ -36,8 +43,9 @@ class AudioManager: NSObject {
     }
 
     func beginNewRecording() {
-        let newRecording = ActiveRecording(startDate: .now)
-        let filepath = documentsDir().appendingPathComponent(newRecording.filename)
+        let now = Date.now
+        let newRecording = ActiveRecording(id: now.fileFormat(), startDate: now)
+        let filepath = FileSystem.path(for: .recording(name: newRecording.fileName))
         self.currentRecording = newRecording
 
         let settings = [
@@ -98,16 +106,12 @@ class AudioManager: NSObject {
     }
 
     func endRecording() {
+        if let currentRecording {
+            print("Ended recording. File is located at ", FileSystem.path(for: .recording(name: currentRecording.fileName)))
+        }
         currentRecording = nil
         audioRecorder?.stop()
         audioRecorder = nil
-
-        print("Ended recording. File is located at ", documentsDir().appendingPathComponent("recording.m4a").absoluteString)
-    }
-
-    func documentsDir() -> URL {
-        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-        return paths[0]
     }
 }
 
