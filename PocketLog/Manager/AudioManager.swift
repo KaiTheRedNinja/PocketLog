@@ -34,7 +34,9 @@ class AudioManager: NSObject {
     }
 
     func beginRecording() {
-        let audioFilename = documentsDir().appendingPathComponent("recording.m4a")
+        let fileId = UUID()
+        let filename = "recording_\(fileId.uuidString).m4a"
+        let filepath = documentsDir().appendingPathComponent(filename)
 
         let settings = [
             AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
@@ -44,7 +46,7 @@ class AudioManager: NSObject {
         ]
 
         do {
-            audioRecorder = try AVAudioRecorder(url: audioFilename, settings: settings)
+            audioRecorder = try AVAudioRecorder(url: filepath, settings: settings)
         } catch {
             print("Failed to create audio recorder!")
             isRecording = false
