@@ -11,7 +11,9 @@ import SwiftUI
 @Observable
 class AudioManager: NSObject {
     var permissionGranted: Bool = false
-    var isRecording: Bool = false
+    var currentRecording: ActiveRecording?
+
+    var isRecording: Bool { currentRecording?.isRecording == true }
 
     @ObservationIgnored var recordingSession: AVAudioSession?
     @ObservationIgnored var audioRecorder: AVAudioRecorder?
@@ -33,10 +35,10 @@ class AudioManager: NSObject {
         }
     }
 
-    func beginRecording() {
-        let fileId = UUID()
-        let filename = "recording_\(fileId.uuidString).m4a"
-        let filepath = documentsDir().appendingPathComponent(filename)
+    func beginNewRecording() {
+        let newRecording = ActiveRecording(startDate: .now)
+        let filepath = documentsDir().appendingPathComponent(newRecording.filename)
+        self.currentRecording = newRecording
 
         let settings = [
             AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
@@ -49,33 +51,54 @@ class AudioManager: NSObject {
             audioRecorder = try AVAudioRecorder(url: filepath, settings: settings)
         } catch {
             print("Failed to create audio recorder!")
-            isRecording = false
+            currentRecording = nil
             return
         }
-
-        isRecording = true
 
         audioRecorder!.delegate = self
         recordingSession?.activate(options: []) { [weak self] success, error in
             guard let self else { return }
 
             guard success else {
-                print("Audio session activation failed: \(String(describing: error))")
-                isRecording = false
+                print("Audio session reactivation failed: \(String(describing: error))")
+                currentRecording = nil
                 return
             }
 
             DispatchQueue.global(qos: .userInitiated).async { [weak self] in
                 guard let self else { return }
                 let success = audioRecorder!.record()
-                isRecording = success
-                print("Recording started: \(success)")
+                if success == false {
+                    print("Could not restart recording")
+                    currentRecording = nil
+                    return
+                }
+                print("Recording restarted")
             }
         }
     }
 
+    func pauseRecording() {
+        audioRecorder?.pause()
+        currentRecording?.isRecording = false
+    }
+
+    func resumeRecording() {
+        currentRecording?.isRecording = true
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self else { return }
+            let success = audioRecorder!.record()
+            if success == false {
+                print("Could not restart recording")
+                currentRecording = nil
+                return
+            }
+            print("Recording restarted")
+        }
+    }
+
     func endRecording() {
-        isRecording = false
+        currentRecording = nil
         audioRecorder?.stop()
         audioRecorder = nil
 
