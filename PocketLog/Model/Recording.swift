@@ -50,4 +50,13 @@ extension Date {
 
         return formatter.string(from: self)
     }
+
+    func displayFormat() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy/MM/dd HH:mm:ss"
+        formatter.locale = .current
+        formatter.timeZone = .current
+
+        return formatter.string(from: self)
+    }
 }

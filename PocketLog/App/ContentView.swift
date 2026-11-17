@@ -77,7 +77,7 @@ struct ContentView: View {
                                 }
                             }
 
-                        Text(record.saveDate.fileFormat())
+                        Text(record.saveDate.displayFormat())
                             .font(.caption)
                     }
                 }
