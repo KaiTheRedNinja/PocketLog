@@ -8,11 +8,11 @@ Could the voice memos app do the same thing? Probably. But it doesn't feel as co
 
 ## Goals
 Functionality
-- [ ] Record audio
+- [x] Record audio
 - [ ] Volume button controls for play/stop
 - [ ] Play back audio
-- [ ] Save and label multiple tracks
-- [ ] Export audio
+- [x] Save and label multiple tracks
+- [x] Export audio
 
 UI:
 - [ ] Rotating tape
@@ -20,3 +20,11 @@ UI:
 - [ ] LCD-like duration display
 - [ ] Skeomorphic play/pause/skip/record buttons
 - [ ] Handwriting-like labels
+- [ ] Distinct tactile feedback on
+  - [ ] Start/restart recording
+  - [ ] Pause recording
+  - [ ] Save recording
+
+Bells and whistles:
+- [ ] Shortcut to be able to trigger from action button/siri
+- [ ] Full blind operation
