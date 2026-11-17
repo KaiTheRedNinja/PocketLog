@@ -100,6 +100,25 @@ struct ContentView: View {
 
             // the grills at the bottom
             UnevenRoundedRectangle(cornerRadii: .init(bottomLeading: 24, bottomTrailing: 24))
+                .fill(Color(white: 0.3))
+                .overlay {
+                    Circle()
+                        .fill(Color(white: 0.1))
+                        .frame(width: 200, height: 200)
+                }
+                .mask {
+                    VStack {
+                        ForEach(0..<15) { _ in
+                            HStack {
+                                ForEach(0..<13) { _ in
+                                    Circle()
+                                        .frame(width: 15, height: 15)
+                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                }
+                            }
+                        }
+                    }
+                }
                 .frame(height: 300)
                 .padding(40)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
