@@ -5,6 +5,8 @@ struct ContentView: View {
     @State var audioManager = AudioManager()
     @State var pastRecordsManager = PastRecordsManager()
 
+    @State var exportUrl: URL?
+
     var body: some View {
         List {
             Section {
@@ -53,6 +55,19 @@ struct ContentView: View {
                 }
                 ForEach(pastRecordsManager.records) { record in
                     Text(record.name)
+                        .contextMenu {
+                            Button("Export") {
+                                do {
+                                    exportUrl = try FileSystem.export(
+                                        file: .recording(name: record.fileName),
+                                        newName: record.name + ".m4a"
+                                    )
+                                } catch {
+                                    print("Could not export: \(error)")
+                                    exportUrl = nil
+                                }
+                            }
+                        }
                 }
             }
 
@@ -66,6 +81,9 @@ struct ContentView: View {
                 }
             }
         }
+        .sheet(item: $exportUrl) { url in
+            ShareView(activityItems: [url])
+        }
         .task {
             async let a = audioManager.requestRecordingPermission()
             async let b = pastRecordsManager.populate()
@@ -77,4 +95,8 @@ struct ContentView: View {
             }
         }
     }
+}
+
+extension URL: @retroactive Identifiable {
+    public var id: String { self.path() }
 }
