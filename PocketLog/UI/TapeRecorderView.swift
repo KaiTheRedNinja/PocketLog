@@ -13,7 +13,7 @@ let controlsWidth: CGFloat = 80
 let controlsSpacing: CGFloat = 5
 let controlsMargins: CGFloat = 10
 let controlsTotalHeight: CGFloat = controlsMargins*2 + controlsHeight*4 + controlsSpacing*3
-let volumeButtonsCenterOffset: CGFloat = 255
+let volumeButtonsCenterOffset: CGFloat = 320
 
 struct TapeRecorderView: View {
     @State var audioManager = AudioManager()
@@ -32,6 +32,14 @@ struct TapeRecorderView: View {
             // background
             backgroundView
 
+            Text("PocketLog Tape Recorder")
+                .italic()
+                .bold()
+                .foregroundStyle(Color(white: 0.2))
+                .padding(.leading, 40)
+                .padding(.top, 80)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+
             // controls
             controlsView
 
@@ -41,6 +49,7 @@ struct TapeRecorderView: View {
             // the grills at the bottom
             grillsView
         }
+        .ignoresSafeArea(.all)
     }
 
     var backgroundView: some View {
@@ -66,50 +75,26 @@ struct TapeRecorderView: View {
             RoundedRectangle(cornerRadius: 44)
                 .fill(fillGradient)
                 .padding(20)
+                .reverseMask(alignment: .topLeading) {
+                    UnevenRoundedRectangle(cornerRadii: .init(bottomTrailing: controlsRadius+controlsMargins, topTrailing: controlsRadius+controlsMargins))
+                        .frame(width: controlsWidth + 10, height: controlsTotalHeight)
+                        .padding(.top, volumeButtonsCenterOffset - controlsTotalHeight/2)
+                }
         }
-        .ignoresSafeArea(.all)
     }
 
     var controlsView: some View {
         VStack(alignment: .leading, spacing: 5) {
-            UnevenRoundedRectangle(cornerRadii: .init(bottomTrailing: 0, topTrailing: controlsRadius))
-                .fill(.red)
-                .overlay {
-                    Image(systemName: "record.circle")
-                        .resizable()
-                        .scaledToFit()
-                        .foregroundStyle(.white)
-                        .frame(width: 30, height: 30)
-                }
+            TapeButtonView(cornerRadii: .init(bottomTrailing: 0, topTrailing: controlsRadius), fillColor: .red, icon: "record.circle")
                 .frame(width: controlsWidth, height: controlsHeight * 2 + controlsSpacing)
 
-            UnevenRoundedRectangle(cornerRadii: .init(bottomTrailing: 0, topTrailing: 0))
-                .fill(.black)
-                .overlay {
-                    Image(systemName: "pause.fill")
-                        .resizable()
-                        .scaledToFit()
-                        .foregroundStyle(.white)
-                        .frame(width: 30, height: 30)
-                }
+            TapeButtonView(cornerRadii: .init(bottomTrailing: 0, topTrailing: 0), fillColor: .init(white: 0.2), icon: "pause.fill")
                 .frame(width: controlsWidth, height: controlsHeight)
 
-            UnevenRoundedRectangle(cornerRadii: .init(bottomTrailing: controlsRadius, topTrailing: 0))
-                .fill(.black)
-                .overlay {
-                    Image(systemName: "eject.fill")
-                        .resizable()
-                        .scaledToFit()
-                        .foregroundStyle(.white)
-                        .frame(width: 30, height: 30)
-                }
+            TapeButtonView(cornerRadii: .init(bottomTrailing: controlsRadius, topTrailing: 0), fillColor: .init(white: 0.2), icon: "eject.fill")
                 .frame(width: controlsWidth, height: controlsHeight)
         }
         .padding([.vertical, .trailing], controlsMargins)
-        .background {
-            UnevenRoundedRectangle(cornerRadii: .init(bottomTrailing: controlsRadius+controlsMargins, topTrailing: controlsRadius+controlsMargins))
-                .fill(.gray)
-        }
         .padding(.top, volumeButtonsCenterOffset - controlsTotalHeight/2)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
@@ -126,14 +111,15 @@ struct TapeRecorderView: View {
                         .padding(10)
                 }
                 .opacity(0.4)
-                .frame(width: 240, height: 375)
+                .frame(width: 240)
 
             Rectangle()
                 .fill(Color.black)
                 .opacity(0.1)
-                .frame(width: 40, height: 375)
+                .frame(width: 40)
         }
-        .padding(.top, volumeButtonsCenterOffset - 375/2)
+        .frame(height: controlsTotalHeight - controlsMargins*2)
+        .padding(.top, volumeButtonsCenterOffset - controlsTotalHeight/2 + controlsMargins)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
     }
 
@@ -162,5 +148,40 @@ struct TapeRecorderView: View {
             .padding(40)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
             .ignoresSafeArea(.all, edges: .bottom)
+    }
+}
+
+struct TapeButtonView: View {
+    var cornerRadii: RectangleCornerRadii
+    var fillColor: Color
+    var icon: String?
+
+    @State private var fingerDown = false
+
+    var body: some View {
+        UnevenRoundedRectangle(cornerRadii: cornerRadii)
+            .fill(fillColor)
+            .brightness(fingerDown ? -0.2 : 0.0)
+            .overlay {
+                if let icon {
+                    Image(systemName: icon)
+                        .resizable()
+                        .scaledToFit()
+                        .foregroundStyle(.white)
+                        .frame(width: 30, height: 30)
+                }
+            }
+            .gesture(press)
+    }
+
+    var press: some Gesture {
+        DragGesture(minimumDistance: 0)
+            .onChanged { _ in
+                fingerDown = true
+            }
+            .onEnded { finished in
+                fingerDown = false
+                print("Finished pressing!")
+            }
     }
 }
