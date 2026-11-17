@@ -33,6 +33,28 @@ enum FileSystem {
         try FileManager.default.contentsOfDirectory(atPath: path(for: dir).path())
     }
 
+    /// Prepares a document and puts it in the temporary directory under a new name
+    static func export(file: File, newName: String) throws -> URL {
+        let sourcePath = path(for: file)
+        let temporaryDirectory = FileManager.default.temporaryDirectory
+        let exportsDirectory = temporaryDirectory.appending(path: "exports", directoryHint: .isDirectory)
+        let destinationUrl = exportsDirectory.appendingPathComponent(newName)
+        // create the exports directory
+        try FileManager.default.createDirectory(at: exportsDirectory, withIntermediateDirectories: true)
+        // copy from file in file system to export directory
+        try FileManager.default.copyItem(at: sourcePath, to: destinationUrl)
+        // update the properties. This can fail without affecting the rest of the function
+        do  {
+            let attributes = try FileManager.default.attributesOfItem(atPath: sourcePath.path())
+            if let creationDate = attributes[.creationDate] {
+                try FileManager.default.setAttributes([.creationDate: creationDate], ofItemAtPath: destinationUrl.path())
+            }
+        } catch {
+            print("Could not copy attributes: \(error.localizedDescription)")
+        }
+        return destinationUrl
+    }
+
     static func path(for file: File) -> URL {
         docsDir().appendingPathComponent(file.path)
     }
