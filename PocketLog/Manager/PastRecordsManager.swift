@@ -60,11 +60,30 @@ class PastRecordsManager {
         }
     }
 
+    /// Deletes the records at the given offsets permenantly
+    func delete(offsets: IndexSet) {
+        let recordsToRemove = offsets.map { records[$0] }
+        records.remove(atOffsets: offsets)
+        for record in recordsToRemove {
+            // delete from file system
+            do {
+                try FileSystem.delete(.recording(name: record.fileName))
+            } catch {
+                print("Could not delete file \(record.fileName): \(error)")
+            }
+        }
+    }
+
     /// Saves all renamings
     func save() {
         var newMap: [String: String] = [:]
         for record in records where record.name != record.id {
             newMap[record.id] = record.name
+        }
+        do {
+            try FileSystem.write(value: newMap, to: .renames)
+        } catch {
+            print("Could not update renames: \(error)")
         }
     }
 }

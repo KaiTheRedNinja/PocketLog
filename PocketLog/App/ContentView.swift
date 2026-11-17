@@ -53,21 +53,36 @@ struct ContentView: View {
                         }
                     }
                 }
-                ForEach(pastRecordsManager.records) { record in
-                    Text(record.name)
-                        .contextMenu {
-                            Button("Export") {
-                                do {
-                                    exportUrl = try FileSystem.export(
-                                        file: .recording(name: record.fileName),
-                                        newName: record.name + ".m4a"
-                                    )
-                                } catch {
-                                    print("Could not export: \(error)")
-                                    exportUrl = nil
+                ForEach($pastRecordsManager.records) { $record in
+                    VStack(alignment: .leading) {
+                        TextField("", text: $record.name)
+                            .onSubmit {
+                                // a name cannot be left empty
+                                if record.name.isEmpty {
+                                    record.name = record.fileName
+                                }
+                                pastRecordsManager.save()
+                            }
+                            .contextMenu {
+                                Button("Export") {
+                                    do {
+                                        exportUrl = try FileSystem.export(
+                                            file: .recording(name: record.fileName),
+                                            newName: record.name + ".m4a"
+                                        )
+                                    } catch {
+                                        print("Could not export: \(error)")
+                                        exportUrl = nil
+                                    }
                                 }
                             }
-                        }
+
+                        Text(record.saveDate.fileFormat())
+                            .font(.caption)
+                    }
+                }
+                .onDelete { indexSet in
+                    pastRecordsManager.delete(offsets: indexSet)
                 }
             }
 
