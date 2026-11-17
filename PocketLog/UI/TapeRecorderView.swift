@@ -85,14 +85,29 @@ struct TapeRecorderView: View {
 
     var controlsView: some View {
         VStack(alignment: .leading, spacing: 5) {
-            TapeButtonView(cornerRadii: .init(bottomTrailing: 0, topTrailing: controlsRadius), fillColor: .red, icon: "record.circle")
-                .frame(width: controlsWidth, height: controlsHeight * 2 + controlsSpacing)
+            TapeButtonView(
+                cornerRadii: .init(bottomTrailing: 0, topTrailing: controlsRadius),
+                scaleAnchor: .bottomLeading,
+                fillColor: .red,
+                icon: "record.circle"
+            )
+            .frame(width: controlsWidth, height: controlsHeight * 2 + controlsSpacing)
 
-            TapeButtonView(cornerRadii: .init(bottomTrailing: 0, topTrailing: 0), fillColor: .init(white: 0.2), icon: "pause.fill")
-                .frame(width: controlsWidth, height: controlsHeight)
+            TapeButtonView(
+                cornerRadii: .init(bottomTrailing: 0, topTrailing: 0),
+                scaleAnchor: .leading,
+                fillColor: .init(white: 0.2),
+                icon: "pause.fill"
+            )
+            .frame(width: controlsWidth, height: controlsHeight)
 
-            TapeButtonView(cornerRadii: .init(bottomTrailing: controlsRadius, topTrailing: 0), fillColor: .init(white: 0.2), icon: "eject.fill")
-                .frame(width: controlsWidth, height: controlsHeight)
+            TapeButtonView(
+                cornerRadii: .init(bottomTrailing: controlsRadius, topTrailing: 0),
+                scaleAnchor: .topLeading,
+                fillColor: .init(white: 0.2),
+                icon: "eject.fill"
+            )
+            .frame(width: controlsWidth, height: controlsHeight)
         }
         .padding([.vertical, .trailing], controlsMargins)
         .padding(.top, volumeButtonsCenterOffset - controlsTotalHeight/2)
@@ -153,6 +168,7 @@ struct TapeRecorderView: View {
 
 struct TapeButtonView: View {
     var cornerRadii: RectangleCornerRadii
+    var scaleAnchor: UnitPoint = .center
     var fillColor: Color
     var icon: String?
 
@@ -161,16 +177,25 @@ struct TapeButtonView: View {
     var body: some View {
         UnevenRoundedRectangle(cornerRadii: cornerRadii)
             .fill(fillColor)
-            .brightness(fingerDown ? -0.2 : 0.0)
+            .brightness(-0.5)
             .overlay {
-                if let icon {
-                    Image(systemName: icon)
-                        .resizable()
-                        .scaledToFit()
-                        .foregroundStyle(.white)
-                        .frame(width: 30, height: 30)
-                }
+                let scale = fingerDown ? 0.95 : 1
+
+                UnevenRoundedRectangle(cornerRadii: cornerRadii)
+                    .fill(fillColor)
+                    .brightness(fingerDown ? -0.1 : 0.0)
+                    .overlay {
+                        if let icon {
+                            Image(systemName: icon)
+                                .resizable()
+                                .scaledToFit()
+                                .foregroundStyle(.white)
+                                .frame(width: 30, height: 30)
+                        }
+                    }
+                    .scaleEffect(.init(width: scale, height: scale), anchor: scaleAnchor)
             }
+            .animation(.linear(duration: 0.1), value: fingerDown)
             .gesture(press)
     }
 
