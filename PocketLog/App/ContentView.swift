@@ -44,7 +44,7 @@ struct ContentView: View {
             // controls
             let controlsRadius: CGFloat = 20
             let controlsHeight: CGFloat = 90
-            let controlsWidth: CGFloat = 70
+            let controlsWidth: CGFloat = 80
             let controlsSpacing: CGFloat = 5
             let controlsMargins: CGFloat = 10
             let controlsTotalHeight: CGFloat = controlsMargins*2 + controlsHeight*4 + controlsSpacing*3
@@ -92,11 +92,26 @@ struct ContentView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
 
             // the casette player looking thing
-            Rectangle()
-                .frame(width: 240, height: 375)
-                .padding(.top, volumeButtonsCenterOffset - 375/2)
-                .padding(.trailing, 50)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+            HStack(spacing: 0) {
+                // TODO: add the casette player underneath it
+                Rectangle()
+                    .fill(Color.black)
+                    .overlay {
+                        Rectangle()
+                            .fill(Color.black)
+                            .opacity(0.1)
+                            .padding(10)
+                    }
+                    .opacity(0.4)
+                    .frame(width: 240, height: 375)
+
+                Rectangle()
+                    .fill(Color.black)
+                    .opacity(0.1)
+                    .frame(width: 40, height: 375)
+            }
+            .padding(.top, volumeButtonsCenterOffset - 375/2)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
 
             // the grills at the bottom
             UnevenRoundedRectangle(cornerRadii: .init(bottomLeading: 24, bottomTrailing: 24))
