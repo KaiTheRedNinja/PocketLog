@@ -7,111 +7,103 @@ struct ContentView: View {
 
     @State var exportUrl: URL?
 
+    // possible interface plan?
+    // left side, next to volume buttons
+    // - start/resume recording (double size?
+    // - pause recording
+    // - eject
+
     var body: some View {
-        List {
-            Section {
-                Text(audioManager.permissionGranted ? "Permission granted" : "Need permission")
+        ZStack {
+            // background
+            ZStack {
+                let fillGradient = LinearGradient(
+                    colors: [
+                        // taken by sampling random spots on an image of a casette player :P
+                        Color(red: 0.722, green: 0.718, blue: 0.710),
+                        Color(red: 0.655, green: 0.631, blue: 0.624),
+                        Color(red: 0.521, green: 0.518, blue: 0.521)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+
+                // TODO: consider splitting up this border into 4 segments to shade each individually
+                // border
+                Rectangle()
+                    .fill(fillGradient)
+                    .brightness(-0.1)
+
+                // main body
+                RoundedRectangle(cornerRadius: 44)
+                    .fill(fillGradient)
+                    .padding(20)
             }
+            .ignoresSafeArea(.all)
 
-            Section {
-                HStack {
-                    Image(systemName: audioManager.currentRecording == nil ? "record.circle" : "stop.circle")
-                        .resizable()
-                        .foregroundStyle(Color.primary)
-                        .onTapGesture {
-                            if audioManager.currentRecording == nil {
-                                audioManager.beginNewRecording()
-                            } else {
-                                audioManager.endRecording()
-                            }
-                        }
-                        .frame(width: 100, height: 100)
-
-                    Image(systemName: audioManager.isRecording ? "pause.circle" : "play.circle")
-                        .resizable()
-                        .foregroundStyle(audioManager.currentRecording == nil ? Color.secondary : Color.primary)
-                        .onTapGesture {
-                            if audioManager.isRecording {
-                                audioManager.pauseRecording()
-                            } else {
-                                audioManager.resumeRecording()
-                            }
-                        }
-                        .frame(width: 100, height: 100)
-                        .disabled(audioManager.currentRecording == nil)
-                }
-                .buttonStyle(.plain)
-            }
-
-            Section {
-                Button("Reload records") {
-                    _ = Task {
-                        do {
-                            try await pastRecordsManager.populate()
-                        } catch {
-                            print("Could not populate past records")
-                        }
+            // controls
+            let controlsRadius: CGFloat = 20
+            let controlsHeight: CGFloat = 90
+            let controlsWidth: CGFloat = 70
+            let controlsSpacing: CGFloat = 5
+            let controlsMargins: CGFloat = 10
+            let controlsTotalHeight: CGFloat = controlsMargins*2 + controlsHeight*4 + controlsSpacing*3
+            let volumeButtonsCenterOffset: CGFloat = 255
+            VStack(alignment: .leading, spacing: 5) {
+                UnevenRoundedRectangle(cornerRadii: .init(bottomTrailing: 0, topTrailing: controlsRadius))
+                    .fill(.red)
+                    .overlay {
+                        Image(systemName: "record.circle")
+                            .resizable()
+                            .scaledToFit()
+                            .foregroundStyle(.white)
+                            .frame(width: 30, height: 30)
                     }
-                }
-                ForEach($pastRecordsManager.records) { $record in
-                    VStack(alignment: .leading) {
-                        TextField("", text: $record.name)
-                            .onSubmit {
-                                // a name cannot be left empty
-                                if record.name.isEmpty {
-                                    record.name = record.fileName
-                                }
-                                pastRecordsManager.save()
-                            }
-                            .contextMenu {
-                                Button("Export") {
-                                    do {
-                                        exportUrl = try FileSystem.export(
-                                            file: .recording(name: record.fileName),
-                                            newName: record.name + ".m4a"
-                                        )
-                                    } catch {
-                                        print("Could not export: \(error)")
-                                        exportUrl = nil
-                                    }
-                                }
-                            }
+                    .frame(width: controlsWidth, height: controlsHeight * 2 + controlsSpacing)
 
-                        Text(record.saveDate.displayFormat())
-                            .font(.caption)
+                UnevenRoundedRectangle(cornerRadii: .init(bottomTrailing: 0, topTrailing: 0))
+                    .fill(.black)
+                    .overlay {
+                        Image(systemName: "pause.fill")
+                            .resizable()
+                            .scaledToFit()
+                            .foregroundStyle(.white)
+                            .frame(width: 30, height: 30)
                     }
-                }
-                .onDelete { indexSet in
-                    pastRecordsManager.delete(offsets: indexSet)
-                }
-            }
+                    .frame(width: controlsWidth, height: controlsHeight)
 
-            Section {
-                Button("Wipe", role: .destructive) {
-                    do {
-                        try pastRecordsManager.deleteAllInRoot()
-                    } catch {
-                        print("Could not wipe")
+                UnevenRoundedRectangle(cornerRadii: .init(bottomTrailing: controlsRadius, topTrailing: 0))
+                    .fill(.black)
+                    .overlay {
+                        Image(systemName: "eject.fill")
+                            .resizable()
+                            .scaledToFit()
+                            .foregroundStyle(.white)
+                            .frame(width: 30, height: 30)
                     }
-                }
+                    .frame(width: controlsWidth, height: controlsHeight)
             }
-        }
-        .sheet(item: $exportUrl) { url in
-            ShareView(activityItems: [url])
-        }
-        .task {
-            async let a = audioManager.requestRecordingPermission()
-            async let b = pastRecordsManager.populate()
+            .padding([.vertical, .trailing], controlsMargins)
+            .background {
+                UnevenRoundedRectangle(cornerRadii: .init(bottomTrailing: controlsRadius+controlsMargins, topTrailing: controlsRadius+controlsMargins))
+                    .fill(.gray)
+            }
+            .padding(.top, volumeButtonsCenterOffset - controlsTotalHeight/2)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
 
-            do {
-                _ = try await (a, b)
-            } catch {
-                print("Something failed?")
-            }
+            // the casette player looking thing
+            Rectangle()
+                .frame(width: 240, height: 375)
+                .padding(.top, volumeButtonsCenterOffset - 375/2)
+                .padding(.trailing, 50)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+
+            // the grills at the bottom
+            UnevenRoundedRectangle(cornerRadii: .init(bottomLeading: 24, bottomTrailing: 24))
+                .frame(height: 300)
+                .padding(40)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                .ignoresSafeArea(.all, edges: .bottom)
         }
     }
-}
-
-extension URL: @retroactive Identifiable {
-    public var id: String { self.path() }
 }
