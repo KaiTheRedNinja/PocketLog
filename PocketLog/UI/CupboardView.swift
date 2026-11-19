@@ -27,8 +27,13 @@ struct CupboardView: View {
                             .fill(Color.white)
                             .opacity(0.2)
                     }
+                    .overlay {
+                        LinearGradient(colors: [.clear, .brown], startPoint: .leading, endPoint: .trailing)
+                            .opacity(0.8)
+                            .brightness(-0.6)
+                    }
                 Color.brown
-                    .brightness(-0.8)
+                    .brightness(-0.6)
                 Color.brown
                     .brightness(-0.5)
                     .frame(width: 50)
@@ -36,6 +41,11 @@ struct CupboardView: View {
                         VanishingLines(height: 20, lhsScale: 0.8, rhsScale: 1.0, vOffset: offset)
                             .fill(Color.white)
                             .opacity(0.2)
+                    }
+                    .overlay {
+                        LinearGradient(colors: [.clear, .brown], startPoint: .trailing, endPoint: .leading)
+                            .opacity(0.8)
+                            .brightness(-0.6)
                     }
 
                 Color.brown
