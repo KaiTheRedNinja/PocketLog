@@ -11,6 +11,8 @@ struct CupboardView: View {
     @State var pastRecordsManager = PastRecordsManager()
     @State var exportUrl: URL?
 
+    @State private var offset = CGFloat.zero
+
     var body: some View {
         ZStack {
             HStack(spacing: 0) {
@@ -20,6 +22,11 @@ struct CupboardView: View {
                 Color.brown
                     .brightness(-0.5)
                     .frame(width: 50)
+                    .overlay {
+                        VanishingLines(height: 20, lhsScale: 1.2, rhsScale: 1, vOffset: 0)
+                            .fill(Color.white)
+                            .opacity(0.2)
+                    }
                 Color.brown
                     .brightness(-0.8)
                 Color.brown
@@ -62,6 +69,9 @@ struct CupboardView: View {
                 }
             }
             .defaultScrollAnchor(.bottom)
+            .onScrollGeometryChange(for: ScrollGeometry.self, of: { $0 }) { oldValue, newValue in
+                print("Offset: \(newValue.contentOffset.y) in \(newValue.containerSize)")
+            }
         }
 //        List {
 //            Button("Reload records") {
@@ -136,5 +146,48 @@ struct CupboardView: View {
             }
             .padding(8)
         }
+    }
+}
+
+struct VanishingLines: Shape {
+    /// The height of a single line
+    var height: CGFloat
+    /// How much the left side of the line is scaled by
+    var lhsScale: CGFloat
+    /// How much the right side of the line is scaled by
+    var rhsScale: CGFloat
+    /// The vertical offset
+    var vOffset: CGFloat
+
+    func path(in rect: CGRect) -> Path {
+        if lhsScale <= 0 || rhsScale <= 0 || height <= 0 {
+            print("Cannot create a vanishing line with a non-positive scale/height !!!!")
+            return .init()
+        }
+        // um idk how to do the parallax error I would like to do... ima start with assuming the top of the shape is where they're flat
+
+        var lhsCurPos = rect.minY
+        var rhsCurPos = rect.minY
+
+        var path = Path()
+
+        let lhsHeightInterval = height * lhsScale
+        let rhsHeightInterval = height * rhsScale
+
+        while lhsCurPos < rect.maxY || rhsCurPos < rect.maxY {
+            // draw one rectangle
+            path.move(to: .init(x: rect.minX, y: lhsCurPos)) // top left
+            path.addLine(to: .init(x: rect.maxX, y: rhsCurPos)) // top right
+            path.addLine(to: .init(x: rect.maxX, y: rhsCurPos + rhsHeightInterval)) // bottom right
+            path.addLine(to: .init(x: rect.minX, y: lhsCurPos + lhsHeightInterval)) // bottom left
+            path.addLine(to: .init(x: rect.minX, y: lhsCurPos)) // close shape
+            path.closeSubpath()
+
+            // increase the position by 2x of their respective intervals
+            lhsCurPos += lhsHeightInterval * 2
+            rhsCurPos += rhsHeightInterval * 2
+        }
+
+        return path
     }
 }
