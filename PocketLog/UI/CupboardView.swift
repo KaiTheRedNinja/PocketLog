@@ -23,7 +23,7 @@ struct CupboardView: View {
                     .brightness(-0.5)
                     .frame(width: 50)
                     .overlay {
-                        VanishingLines(height: 20, lhsScale: 1.2, rhsScale: 1.0, vOffset: offset)
+                        VanishingLines(height: 20, lhsScale: 1.0, rhsScale: 0.8, vOffset: offset)
                             .fill(Color.white)
                             .opacity(0.2)
                     }
@@ -33,7 +33,7 @@ struct CupboardView: View {
                     .brightness(-0.5)
                     .frame(width: 50)
                     .overlay {
-                        VanishingLines(height: 20, lhsScale: 1.0, rhsScale: 1.2, vOffset: offset)
+                        VanishingLines(height: 20, lhsScale: 0.8, rhsScale: 1.0, vOffset: offset)
                             .fill(Color.white)
                             .opacity(0.2)
                     }
@@ -173,9 +173,10 @@ struct VanishingLines: Shape {
             return .init()
         }
 
-        let visibleSegments = max(rect.height / (height * lhsScale), rect.height / (height * rhsScale)).rounded(.awayFromZero)
-        var lhsCurPos = rect.midY - visibleSegments * height * lhsScale / 2
-        var rhsCurPos = rect.midY - visibleSegments * height * rhsScale / 2
+        let visibleSegments = max(rect.height / (height * lhsScale), rect.height / (height * rhsScale)).rounded(.awayFromZero) + 2
+        let unscaledOffset = visibleSegments * height / 2 + vOffset.posRemainder(dividingBy: height)
+        var lhsCurPos = rect.midY - unscaledOffset * lhsScale
+        var rhsCurPos = rect.midY - unscaledOffset * rhsScale
 
         var path = Path()
 
@@ -197,5 +198,12 @@ struct VanishingLines: Shape {
         }
 
         return path
+    }
+}
+
+extension BinaryFloatingPoint {
+    func posRemainder(dividingBy rhs: Self) -> Self {
+        let mod = self.truncatingRemainder(dividingBy: rhs)
+        return mod >= 0 ? mod : mod + rhs
     }
 }
