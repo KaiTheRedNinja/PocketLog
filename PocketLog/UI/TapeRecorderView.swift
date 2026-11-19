@@ -126,17 +126,31 @@ struct TapeRecorderView: View {
 
     var casetteView: some View {
         HStack(spacing: 0) {
-            // TODO: add the casette player underneath it
-            Rectangle()
-                .fill(Color.black)
-                .overlay {
-                    Rectangle()
-                        .fill(Color.black)
-                        .opacity(0.1)
-                        .padding(10)
+            ZStack {
+                // TODO: improve this casette player
+                VStack {
+                    Spacer()
+                    Circle()
+                        .frame(width: 50, height: 50)
+                    Spacer()
+                    Circle()
+                        .frame(width: 50, height: 50)
+                    Spacer()
                 }
-                .opacity(0.4)
-                .frame(width: 240)
+                .offset(x: audioManager.currentRecording == nil ? 400 : 0)
+                .animation(.easeInOut, value: audioManager.currentRecording == nil)
+
+                Rectangle()
+                    .fill(Color.black)
+                    .overlay {
+                        Rectangle()
+                            .fill(Color.black)
+                            .opacity(0.1)
+                            .padding(10)
+                    }
+                    .opacity(0.4)
+                    .frame(width: 240)
+            }
 
             Rectangle()
                 .fill(Color.black)
