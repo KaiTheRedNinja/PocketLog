@@ -23,7 +23,7 @@ struct CupboardView: View {
                     .brightness(-0.5)
                     .frame(width: 50)
                     .overlay {
-                        VanishingLines(height: 20, lhsScale: 1.2, rhsScale: 1, vOffset: 0)
+                        VanishingLines(height: 20, lhsScale: 1.2, rhsScale: 1.0, vOffset: offset)
                             .fill(Color.white)
                             .opacity(0.2)
                     }
@@ -32,6 +32,11 @@ struct CupboardView: View {
                 Color.brown
                     .brightness(-0.5)
                     .frame(width: 50)
+                    .overlay {
+                        VanishingLines(height: 20, lhsScale: 1.0, rhsScale: 1.2, vOffset: offset)
+                            .fill(Color.white)
+                            .opacity(0.2)
+                    }
 
                 Color.brown
                     .frame(width: 30)
@@ -71,6 +76,7 @@ struct CupboardView: View {
             .defaultScrollAnchor(.bottom)
             .onScrollGeometryChange(for: ScrollGeometry.self, of: { $0 }) { oldValue, newValue in
                 print("Offset: \(newValue.contentOffset.y) in \(newValue.containerSize)")
+                offset = newValue.contentOffset.y
             }
         }
 //        List {
@@ -150,8 +156,10 @@ struct CupboardView: View {
 }
 
 struct VanishingLines: Shape {
-    /// The height of a single line
+    /// The height of a single line pair (filled + non filled)
     var height: CGFloat
+    /// The duty cycle of the pair - 100% = fully filled, 0% = fully empty, 50% = half filled half not filled
+    var dutyCycle: CGFloat = 0.5
     /// How much the left side of the line is scaled by
     var lhsScale: CGFloat
     /// How much the right side of the line is scaled by
@@ -164,10 +172,10 @@ struct VanishingLines: Shape {
             print("Cannot create a vanishing line with a non-positive scale/height !!!!")
             return .init()
         }
-        // um idk how to do the parallax error I would like to do... ima start with assuming the top of the shape is where they're flat
 
-        var lhsCurPos = rect.minY
-        var rhsCurPos = rect.minY
+        let visibleSegments = max(rect.height / (height * lhsScale), rect.height / (height * rhsScale)).rounded(.awayFromZero)
+        var lhsCurPos = rect.midY - visibleSegments * height * lhsScale / 2
+        var rhsCurPos = rect.midY - visibleSegments * height * rhsScale / 2
 
         var path = Path()
 
@@ -178,14 +186,14 @@ struct VanishingLines: Shape {
             // draw one rectangle
             path.move(to: .init(x: rect.minX, y: lhsCurPos)) // top left
             path.addLine(to: .init(x: rect.maxX, y: rhsCurPos)) // top right
-            path.addLine(to: .init(x: rect.maxX, y: rhsCurPos + rhsHeightInterval)) // bottom right
-            path.addLine(to: .init(x: rect.minX, y: lhsCurPos + lhsHeightInterval)) // bottom left
+            path.addLine(to: .init(x: rect.maxX, y: rhsCurPos + rhsHeightInterval * dutyCycle)) // bottom right
+            path.addLine(to: .init(x: rect.minX, y: lhsCurPos + lhsHeightInterval * (1 - dutyCycle))) // bottom left
             path.addLine(to: .init(x: rect.minX, y: lhsCurPos)) // close shape
             path.closeSubpath()
 
-            // increase the position by 2x of their respective intervals
-            lhsCurPos += lhsHeightInterval * 2
-            rhsCurPos += rhsHeightInterval * 2
+            // increase the position by their respective intervals
+            lhsCurPos += lhsHeightInterval
+            rhsCurPos += rhsHeightInterval
         }
 
         return path
