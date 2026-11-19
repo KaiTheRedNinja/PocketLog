@@ -86,27 +86,37 @@ struct TapeRecorderView: View {
     var controlsView: some View {
         VStack(alignment: .leading, spacing: 5) {
             TapeButtonView(
+                isDepressed: audioManager.isRecording,
                 cornerRadii: .init(bottomTrailing: 0, topTrailing: controlsRadius),
                 scaleAnchor: .bottomLeading,
                 fillColor: .red,
                 icon: "record.circle"
-            )
+            ) {
+                audioManager.beginOrResumeRecording()
+            }
             .frame(width: controlsWidth, height: controlsHeight * 2 + controlsSpacing)
 
             TapeButtonView(
+                isDepressed: !audioManager.isRecording,
                 cornerRadii: .init(bottomTrailing: 0, topTrailing: 0),
                 scaleAnchor: .leading,
                 fillColor: .init(white: 0.2),
                 icon: "pause.fill"
-            )
+            ) {
+                audioManager.pauseRecording()
+            }
             .frame(width: controlsWidth, height: controlsHeight)
 
             TapeButtonView(
+                isDepressed: !audioManager.isRecording,
                 cornerRadii: .init(bottomTrailing: controlsRadius, topTrailing: 0),
                 scaleAnchor: .topLeading,
                 fillColor: .init(white: 0.2),
                 icon: "eject.fill"
-            )
+            ) {
+                // ending the recording will also remove the `currentRecording`
+                audioManager.endRecording()
+            }
             .frame(width: controlsWidth, height: controlsHeight)
         }
         .padding([.vertical, .trailing], controlsMargins)
@@ -167,10 +177,13 @@ struct TapeRecorderView: View {
 }
 
 struct TapeButtonView: View {
+    var isDepressed: Bool
     var cornerRadii: RectangleCornerRadii
     var scaleAnchor: UnitPoint = .center
     var fillColor: Color
     var icon: String?
+
+    var onRelease: () -> Void
 
     @State private var fingerDown = false
 
@@ -179,11 +192,12 @@ struct TapeButtonView: View {
             .fill(fillColor)
             .brightness(-0.5)
             .overlay {
-                let scale = fingerDown ? 0.95 : 1
+                let scale = (fingerDown ? 0.95 : 1) * (isDepressed ? 0.9 : 1)
+                let brightness = (fingerDown ? -0.1 : 0.0) + (isDepressed ? -0.1 : 0.0)
 
                 UnevenRoundedRectangle(cornerRadii: cornerRadii)
                     .fill(fillColor)
-                    .brightness(fingerDown ? -0.1 : 0.0)
+                    .brightness(brightness)
                     .overlay {
                         if let icon {
                             Image(systemName: icon)
@@ -197,6 +211,12 @@ struct TapeButtonView: View {
             }
             .animation(.linear(duration: 0.1), value: fingerDown)
             .gesture(press)
+            .onTapGesture {
+                // if the button is in the up position and has been triggered....
+                if !isDepressed {
+                    onRelease()
+                }
+            }
     }
 
     var press: some Gesture {

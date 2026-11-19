@@ -42,6 +42,15 @@ class AudioManager: NSObject {
         }
     }
 
+    /// Resumes the current recording if one exists. Starts a new recording if one doesn't.
+    func beginOrResumeRecording() {
+        if currentRecording == nil {
+            beginNewRecording()
+        } else {
+            resumeRecording()
+        }
+    }
+
     func beginNewRecording() {
         let now = Date.now
         let newRecording = ActiveRecording(id: now.fileFormat(), startDate: now)
