@@ -35,17 +35,8 @@ struct CupboardView: View {
                 LazyVStack(spacing: 0) {
                     ForEach(pastRecordsManager.records) { record in
                         VStack(spacing: 0) {
-                            HStack(spacing: 0) {
-                                Color.white
-                                    .overlay(alignment: .leading) {
-                                        Text(record.name)
-                                            .foregroundStyle(.black)
-                                    }
-
-                                Color.green
-                                    .frame(width: 80)
-                            }
-                            .frame(height: 50)
+                            casette(for: record)
+                            .frame(height: 60)
 
                             Spacer()
                                 .frame(height: 5)
@@ -118,5 +109,32 @@ struct CupboardView: View {
 //            ShareView(activityItems: [url])
 //        }
 //        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    func casette(for record: Recording) -> some View {
+        ZStack {
+            Color.gray
+            HStack(spacing: 0) {
+                Color.white
+                    .overlay(alignment: .leading) {
+                        Text(record.name)
+                            .truncationMode(.middle)
+                            .lineLimit(1)
+                            .foregroundStyle(.black)
+                            .padding(.horizontal, 5)
+                    }
+
+                Color.green
+                    .frame(width: 80)
+                    .overlay(alignment: .trailing) {
+                        Text(record.saveDate.displayFormat())
+                            .font(.caption2)
+                            .multilineTextAlignment(.trailing)
+                            .foregroundStyle(.black)
+                            .padding(.horizontal, 3)
+                    }
+            }
+            .padding(8)
+        }
     }
 }
