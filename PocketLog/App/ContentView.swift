@@ -2,9 +2,69 @@ import SwiftUI
 import Playgrounds
 
 struct ContentView: View {
+    @State var audioManager = AudioManager()
+    @State var pastRecordsManager = PastRecordsManager()
+
+    @State var currentPage: Page = .recorder
+
     var body: some View {
-        TapeRecorderView()
+        GeometryReader { geom in
+            ZStack {
+                TapeRecorderView(audioManager: audioManager)
+                    .offset(x: currentPage == .recorder ? 0 : -geom.size.width)
+
+                Text("Cupboard")
+                    .offset(x: currentPage == .recorder ? geom.size.width : (currentPage == .player ? -geom.size.width : 0))
+
+                Text("Player")
+                    .offset(x: currentPage == .player ? 0 : geom.size.width)
+            }
+            .overlay(alignment: .bottom) {
+                HStack {
+                    VStack(alignment: .leading) {
+                        switch currentPage {
+                        case .recorder: EmptyView()
+                        case .cupboard:
+                            Button("Recorder") {
+                                currentPage = .recorder
+                            }
+                        case .player:
+                            Button("Recorder") {
+                                currentPage = .recorder
+                            }
+                            Button("Cupboard") {
+                                currentPage = .cupboard
+                            }
+                        }
+                    }
+                    Spacer()
+                    VStack(alignment: .leading) {
+                        switch currentPage {
+                        case .recorder:
+                            Button("Player") { // NOTE: hide if no audio being played
+                                currentPage = .player
+                            }
+                            Button("Cupboard") {
+                                currentPage = .cupboard
+                            }
+                        case .cupboard:
+                            Button("Player") {
+                                currentPage = .player
+                            }
+                        case .player: EmptyView()
+                        }
+                    }
+                }
+            }
+        }
+        .animation(.easeInOut, value: currentPage)
     }
+}
+
+enum Page: Equatable {
+    case recorder
+    case cupboard
+    case player
 }
 
 extension View {

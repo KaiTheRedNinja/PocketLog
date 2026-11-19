@@ -17,9 +17,6 @@ let volumeButtonsCenterOffset: CGFloat = 320
 
 struct TapeRecorderView: View {
     @State var audioManager = AudioManager()
-    @State var pastRecordsManager = PastRecordsManager()
-
-    @State var exportUrl: URL?
 
     // possible interface plan?
     // left side, next to volume buttons
@@ -50,6 +47,7 @@ struct TapeRecorderView: View {
             grillsView
         }
         .ignoresSafeArea(.all)
+        .clipped()
     }
 
     var backgroundView: some View {
@@ -108,7 +106,7 @@ struct TapeRecorderView: View {
             .frame(width: controlsWidth, height: controlsHeight)
 
             TapeButtonView(
-                isDepressed: !audioManager.isRecording,
+                isDepressed: false, // eject button will never be depressed
                 cornerRadii: .init(bottomTrailing: controlsRadius, topTrailing: 0),
                 scaleAnchor: .topLeading,
                 fillColor: .init(white: 0.2),
@@ -225,12 +223,6 @@ struct TapeButtonView: View {
             }
             .animation(.linear(duration: 0.1), value: fingerDown)
             .gesture(press)
-            .onTapGesture {
-                // if the button is in the up position and has been triggered....
-                if !isDepressed {
-                    onRelease()
-                }
-            }
     }
 
     var press: some Gesture {
@@ -241,6 +233,11 @@ struct TapeButtonView: View {
             .onEnded { finished in
                 fingerDown = false
                 print("Finished pressing!")
+                // if the button is in the up position and has been triggered....
+                if !isDepressed {
+                    print("Sending release command")
+                    onRelease()
+                }
             }
     }
 }
