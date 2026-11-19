@@ -59,6 +59,9 @@ struct ContentView: View {
             }
         }
         .animation(.easeInOut, value: currentPage)
+        .task {
+            await audioManager.requestRecordingPermission()
+        }
     }
 }
 

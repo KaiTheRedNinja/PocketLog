@@ -39,6 +39,7 @@ struct CupboardView: View {
                                 Color.white
                                     .overlay(alignment: .leading) {
                                         Text(record.name)
+                                            .foregroundStyle(.black)
                                     }
 
                                 Color.green
