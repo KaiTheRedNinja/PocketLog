@@ -23,15 +23,18 @@ class PastRecordsManager {
             for audioFileName in audioFileNames {
                 taskGroup.addTask {
                     let fileNameNoExtension = String(audioFileName.dropLast(4))
-                    let asset = await AVURLAsset(url: FileSystem.path(for: File.recording(name: audioFileName)))
+                    let url = await FileSystem.path(for: File.recording(name: audioFileName))
+                    let asset = AVURLAsset(url: url)
                     do {
                         let saveDate = try await asset.load(.creationDate)
                         let duration = try await asset.load(.duration)
 
+                        let attr = try FileManager.default.attributesOfItem(atPath: url.path)
+
                         let newRecord = Recording(
                             id: fileNameNoExtension,
                             name: renames[fileNameNoExtension] ?? fileNameNoExtension,
-                            saveDate: saveDate?.startDate ?? .distantPast,
+                            saveDate: saveDate?.startDate ?? (attr[FileAttributeKey.modificationDate] as? Date) ?? .distantPast,
                             duration: duration.seconds
                         )
                         return newRecord

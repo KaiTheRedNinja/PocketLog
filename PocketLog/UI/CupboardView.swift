@@ -54,6 +54,9 @@ struct CupboardView: View {
                 pastRecordsManager.delete(offsets: indexSet)
             }
         }
+        .sheet(item: $exportUrl) { url in
+            ShareView(activityItems: [url])
+        }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
