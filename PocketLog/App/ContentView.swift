@@ -5,7 +5,7 @@ struct ContentView: View {
     @State var audioManager = AudioManager()
     @State var pastRecordsManager = PastRecordsManager()
 
-    @State var currentPage: Page = .recorder
+    @State var currentPage: Page = .cupboard
 
     var body: some View {
         GeometryReader { geom in
@@ -20,6 +20,7 @@ struct ContentView: View {
                     .offset(x: currentPage == .player ? 0 : geom.size.width)
             }
             .overlay(alignment: .bottom) {
+                // TODO: make these buttons look more like tassles
                 HStack {
                     VStack(alignment: .leading) {
                         switch currentPage {
@@ -29,11 +30,11 @@ struct ContentView: View {
                                 currentPage = .recorder
                             }
                         case .player:
-                            Button("Recorder") {
-                                currentPage = .recorder
-                            }
                             Button("Cupboard") {
                                 currentPage = .cupboard
+                            }
+                            Button("Recorder") {
+                                currentPage = .recorder
                             }
                         }
                     }
@@ -41,11 +42,11 @@ struct ContentView: View {
                     VStack(alignment: .leading) {
                         switch currentPage {
                         case .recorder:
-                            Button("Player") { // NOTE: hide if no audio being played
-                                currentPage = .player
-                            }
                             Button("Cupboard") {
                                 currentPage = .cupboard
+                            }
+                            Button("Player") { // NOTE: hide if no audio being played
+                                currentPage = .player
                             }
                         case .cupboard:
                             Button("Player") {

@@ -34,7 +34,7 @@ class PastRecordsManager {
                         let newRecord = Recording(
                             id: fileNameNoExtension,
                             name: renames[fileNameNoExtension] ?? fileNameNoExtension,
-                            saveDate: saveDate?.startDate ?? (attr[FileAttributeKey.modificationDate] as? Date) ?? .distantPast,
+                            saveDate: saveDate?.startDate ?? (attr[FileAttributeKey.creationDate] as? Date) ?? .distantPast,
                             duration: duration.seconds
                         )
                         return newRecord
