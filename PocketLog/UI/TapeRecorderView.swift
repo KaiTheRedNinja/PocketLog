@@ -24,6 +24,11 @@ struct TapeRecorderView: View {
     // - pause recording
     // - eject
 
+    // UI improvements that I can do:
+    // - add an LED effect to the recording button
+    // - add duration indicator
+    // - make the casette look like a casette
+
     var body: some View {
         ZStack {
             // background
