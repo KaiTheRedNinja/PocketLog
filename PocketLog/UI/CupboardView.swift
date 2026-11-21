@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct CupboardView: View {
+    @State var audioManager = AudioManager()
     @State var pastRecordsManager = PastRecordsManager()
     @State var exportUrl: URL?
 
@@ -17,6 +18,7 @@ struct CupboardView: View {
         ZStack {
             HStack(spacing: 0) {
                 Color.brown
+                    .brightness(-0.2)
                     .frame(width: 30)
 
                 Color.brown
@@ -49,11 +51,12 @@ struct CupboardView: View {
                     }
 
                 Color.brown
+                    .brightness(-0.2)
                     .frame(width: 30)
             }
             .ignoresSafeArea(.all)
 
-            ScrollView(.vertical, showsIndicators: false) {
+            ScrollView(.vertical, showsIndicators: true) {
                 LazyVStack(spacing: 0) {
                     ForEach(pastRecordsManager.records) { record in
                         VStack(spacing: 0) {
@@ -64,7 +67,7 @@ struct CupboardView: View {
                                 .frame(height: 5)
                             Color.brown
                                 .frame(height: 10)
-                                .brightness(-0.2)
+                                .brightness(-0.3)
                                 .padding(.horizontal, -10)
                             Spacer()
                                 .frame(height: 5)
@@ -72,15 +75,8 @@ struct CupboardView: View {
                         .padding(.horizontal, 35)
                     }
 
-                    Button("refresh") {
-                        _ = Task {
-                            do {
-                                try await pastRecordsManager.populate()
-                            } catch {
-                                print("Could not populate past records")
-                            }
-                        }
-                    }
+                    Spacer()
+                        .frame(height: 80)
                 }
             }
             .defaultScrollAnchor(.bottom)
@@ -88,6 +84,9 @@ struct CupboardView: View {
                 print("Offset: \(newValue.contentOffset.y) in \(newValue.containerSize)")
                 offset = newValue.contentOffset.y
             }
+        }
+        .onChange(of: audioManager.currentRecording, initial: true) { _, _ in
+            refresh()
         }
 //        List {
 //            Button("Reload records") {
@@ -161,6 +160,16 @@ struct CupboardView: View {
                     }
             }
             .padding(8)
+        }
+    }
+
+    func refresh() {
+        _ = Task {
+            do {
+                try await pastRecordsManager.populate()
+            } catch {
+                print("Could not populate past records")
+            }
         }
     }
 }

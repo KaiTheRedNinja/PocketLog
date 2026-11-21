@@ -13,7 +13,7 @@ struct ContentView: View {
                 TapeRecorderView(audioManager: audioManager)
                     .offset(x: currentPage == .recorder ? 0 : -geom.size.width)
 
-                CupboardView(pastRecordsManager: pastRecordsManager)
+                CupboardView(audioManager: audioManager, pastRecordsManager: pastRecordsManager)
                     .offset(x: currentPage == .recorder ? geom.size.width : (currentPage == .player ? -geom.size.width : 0))
 
                 Text("Player")

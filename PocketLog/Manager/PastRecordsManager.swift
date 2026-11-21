@@ -50,7 +50,7 @@ class PastRecordsManager {
                 guard let record else { continue }
                 recordings.append(record)
             }
-            return recordings.sorted(by: { $0.saveDate > $1.saveDate })
+            return recordings.sorted(by: { $0.saveDate < $1.saveDate }) // oldest to newest
         }
 
         self.records = recordings
