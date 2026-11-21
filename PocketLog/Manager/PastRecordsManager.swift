@@ -90,3 +90,63 @@ class PastRecordsManager {
         }
     }
 }
+
+enum DateCategory: Equatable {
+    /// Recording was made today, defined as the recording occuring in the same calendar day as today.
+    case today
+    /// Recording was made N days ago, where `N < 7`. A day is defined as 24 hours.
+    case daysAgo(Int)
+    /// Recording was made N weeks ago, where `1 <= N < 5`. A week is defined as 7 days.
+    case weeksAgo(Int)
+    /// Recording was made N months ago, where `1 <= N < 12`. A month is defined as 30.4375 days (365.25 / 12).
+    case monthsAgo(Int)
+    /// Recording was made N years ago, where `1 <= N`
+    case yearsAgo(Int)
+
+    var description: String {
+        switch self {
+        case .today:
+            "Today"
+        case .daysAgo(let int):
+            "\(int) days ago"
+        case .weeksAgo(let int):
+            "\(int) weeks ago"
+        case .monthsAgo(let int):
+            "\(int) months ago"
+        case .yearsAgo(let int):
+            "\(int) years ago"
+        }
+    }
+}
+
+extension Date {
+    /// The `DateCategory` relative to a given reference, or `Date.now`
+    func category(reference: Date = .now) -> DateCategory {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.locale = .current
+
+        let startOfSelf = calendar.startOfDay(for: self)
+        let startOfRef = calendar.startOfDay(for: reference)
+
+        if startOfRef == startOfSelf { return .today }
+
+        let components = calendar.dateComponents([.day, .weekOfYear, .month, .year], from: self, to: reference)
+
+        let day = components.day ?? 0
+        let weekOfYear = components.weekOfYear ?? 0
+        let month = components.month ?? 0
+        let year = components.year ?? 0
+
+        if day == 0 {
+            return .today
+        } else if day < 7 {
+            return .daysAgo(day)
+        } else if weekOfYear < 5 {
+            return .weeksAgo(weekOfYear)
+        } else if month < 12 {
+            return .monthsAgo(month)
+        } else {
+            return .yearsAgo(year)
+        }
+    }
+}

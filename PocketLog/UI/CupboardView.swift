@@ -58,19 +58,43 @@ struct CupboardView: View {
 
             ScrollView(.vertical, showsIndicators: true) {
                 LazyVStack(spacing: 0) {
-                    ForEach(pastRecordsManager.records) { record in
+                    ForEach(pastRecordsManager.records.enumerated(), id: \.element) { (index, record) in
+                        let showBarrier: DateCategory? = {
+                            let currCategory = record.saveDate.category()
+                            if index > 0 {
+                                let prevCategory = pastRecordsManager.records[index-1].saveDate.category()
+                                if prevCategory != currCategory {
+                                    return currCategory
+                                } else {
+                                    return nil // the prev and next category are the same
+                                }
+                            }
+                            return currCategory
+                        }()
+
                         VStack(spacing: 0) {
+                            Spacer()
+                                .frame(height: 5)
+                            if let showBarrier {
+                                Color.brown
+                                    .frame(height: 40)
+                                    .brightness(-0.3)
+                                    .overlay {
+                                        Text(showBarrier.description)
+                                            .foregroundStyle(.white)
+                                    }
+                                    .padding(.horizontal, -10)
+                            } else {
+                                Color.brown
+                                    .frame(height: 10)
+                                    .brightness(-0.3)
+                                    .padding(.horizontal, -10)
+                            }
+                            Spacer()
+                                .frame(height: 5)
+
                             casette(for: record)
                             .frame(height: 60)
-
-                            Spacer()
-                                .frame(height: 5)
-                            Color.brown
-                                .frame(height: 10)
-                                .brightness(-0.3)
-                                .padding(.horizontal, -10)
-                            Spacer()
-                                .frame(height: 5)
                         }
                         .padding(.horizontal, 35)
                     }
