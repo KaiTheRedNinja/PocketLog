@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import Combine
+import AVFAudio
 
 let controlsRadius: CGFloat = 20
 let controlsHeight: CGFloat = 90
@@ -17,6 +19,9 @@ let volumeButtonsCenterOffset: CGFloat = 320
 
 struct TapeRecorderView: View {
     @State var audioManager = AudioManager()
+
+    @State var timer = Timer.publish(every: 0.05, on: .main, in: .default).autoconnect()
+    @State var duration: TimeInterval = 0
 
     // possible interface plan?
     // left side, next to volume buttons
@@ -30,7 +35,7 @@ struct TapeRecorderView: View {
     // - make the casette look like a casette
 
     var body: some View {
-        ZStack {
+        GeometryReader { geom in ZStack {
             // background
             backgroundView
 
@@ -42,17 +47,30 @@ struct TapeRecorderView: View {
                 .padding(.top, 80)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
 
-            // controls
-            controlsView
+                VStack(spacing: 12) {
+                    HStack(spacing: 0) {
+                        // controls
+                        controlsView
 
-            // the casette player looking thing
-            casetteView
+                        Spacer()
 
-            // the grills at the bottom
-            grillsView
-        }
-        .ignoresSafeArea(.all)
+                        // the casette player looking thing
+                        casetteView
+                    }
+
+                    // the duration "LCD"
+                    durationView
+
+                    // the grills at the bottom
+                    grillsView
+                }
+                .ignoresSafeArea(.all)
+        }.frame(width: geom.size.width, height: geom.size.height)}
         .clipped()
+        .ignoresSafeArea(.all)
+        .onReceive(timer) { _ in
+            duration = audioManager.audioRecorder?.currentTime ?? 0.0
+        }
     }
 
     var backgroundView: some View {
@@ -124,7 +142,6 @@ struct TapeRecorderView: View {
         }
         .padding([.vertical, .trailing], controlsMargins)
         .padding(.top, volumeButtonsCenterOffset - controlsTotalHeight/2)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
     var casetteView: some View {
@@ -162,7 +179,37 @@ struct TapeRecorderView: View {
         }
         .frame(height: controlsTotalHeight - controlsMargins*2)
         .padding(.top, volumeButtonsCenterOffset - controlsTotalHeight/2 + controlsMargins)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+    }
+
+    @ViewBuilder
+    var durationView: some View {
+        // whether its recording or not
+        let recordingStr = if audioManager.audioRecorder == nil {
+            "No tape    | "
+        } else if audioManager.isRecording {
+            "Recording  | "
+        } else {
+            "Paused     | "
+        }
+        // the duration
+        let durationStr = [
+            String(format: "%02d", Int(duration / 3600)),
+            String(format: "%02d", Int(duration.truncatingRemainder(dividingBy: 3600) / 60)),
+            String(format: "%02d", Int(duration.truncatingRemainder(dividingBy: 60)))
+        ].joined(separator: ":") + "." + String(format: "%01d", Int((duration * 10).truncatingRemainder(dividingBy: 10.0)))
+
+        Text(recordingStr + durationStr)
+            .monospaced()
+            .lineLimit(1)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 10)
+            .frame(height: 40, alignment: .leading)
+            .background {
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color(white: 0.4))
+                    .shadow(radius: 6)
+            }
+            .padding(.horizontal, 40)
     }
 
     var grillsView: some View {
@@ -186,10 +233,7 @@ struct TapeRecorderView: View {
                     }
                 }
             }
-            .frame(height: 300)
-            .padding(40)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
-            .ignoresSafeArea(.all, edges: .bottom)
+            .padding([.horizontal, .bottom], 40)
     }
 }
 
