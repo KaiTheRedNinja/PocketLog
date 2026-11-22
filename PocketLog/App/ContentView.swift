@@ -5,7 +5,7 @@ struct ContentView: View {
     @State var audioManager = AudioManager()
     @State var pastRecordsManager = PastRecordsManager()
 
-    @State var currentPage: Page = .player
+    @State var currentPage: Page = .recorder
     @State var currentlyPlaying: Recording? = nil
 
     var body: some View {
@@ -17,7 +17,7 @@ struct ContentView: View {
                 CupboardView(audioManager: audioManager, pastRecordsManager: pastRecordsManager, currentlyPlaying: $currentlyPlaying)
                     .offset(x: currentPage == .recorder ? geom.size.width : (currentPage == .player ? -geom.size.width : 0))
 
-                TapePlayerView(recording: $currentlyPlaying)
+                TapePlayerView(recording: $currentlyPlaying, currentPage: $currentPage)
                     .offset(x: currentPage == .player ? 0 : geom.size.width)
             }
             .onChange(of: currentlyPlaying) { oldValue, newValue in

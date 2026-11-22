@@ -11,6 +11,8 @@ import AVFAudio
 
 struct TapePlayerView: View {
     @Binding var recording: Recording?
+    @Binding var currentPage: Page
+
     @State var playbackManager = AudioPlayback(recording: nil)
 
     @State var timer = Timer.publish(every: 0.05, on: .main, in: .default).autoconnect()
@@ -40,13 +42,13 @@ struct TapePlayerView: View {
                 .padding(.top, 80)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
 
-            VStack(spacing: 12) {
+            VStack(spacing: 20) {
                 // the casette player looking thing
                 cassetteView
                     .zIndex(100)
 
-//                // controls
-//                controlsView
+                // controls
+                controlsView
 
                 // the duration "LCD"
                 durationView
@@ -66,6 +68,7 @@ struct TapePlayerView: View {
                 playbackManager.load(recording: newValue, playAfterLoad: true)
             } else {
                 playbackManager.eject()
+                currentPage = .cupboard
             }
         }
     }
@@ -97,44 +100,49 @@ struct TapePlayerView: View {
     }
 
     var controlsView: some View {
-        VStack(alignment: .leading, spacing: 5) {
+        HStack(alignment: .top, spacing: 5) {
             TapeButtonView(
                 isDepressed: playbackManager.isPlaying,
-                cornerRadii: .init(bottomTrailing: 0, topTrailing: controlsRadius),
-                scaleAnchor: .bottomLeading,
+                cornerRadii: .init(topLeading: controlsRadius, bottomLeading: controlsRadius),
+                scaleAnchor: .trailing,
                 fillColor: .red,
                 icon: "play",
                 activeLed: true
             ) {
                 playbackManager.beginOrResume()
             }
-            .frame(width: controlsWidth, height: controlsHeight * 2 + controlsSpacing)
+            .frame(width: controlsWidth, height: controlsWidth)
 
             TapeButtonView(
                 isDepressed: !playbackManager.isPlaying,
-                cornerRadii: .init(bottomTrailing: 0, topTrailing: 0),
-                scaleAnchor: .leading,
+                cornerRadii: .init(),
+                scaleAnchor: .center,
                 fillColor: .init(white: 0.2),
                 icon: "pause.fill"
             ) {
                 playbackManager.pause()
             }
-            .frame(width: controlsWidth, height: controlsHeight)
+            .frame(width: controlsWidth, height: controlsWidth)
 
             TapeButtonView(
                 isDepressed: false, // eject button will never be depressed
-                cornerRadii: .init(bottomTrailing: controlsRadius, topTrailing: 0),
-                scaleAnchor: .topLeading,
+                cornerRadii: .init(bottomTrailing: controlsRadius, topTrailing: controlsRadius),
+                scaleAnchor: .leading,
                 fillColor: .init(white: 0.2),
                 icon: "eject.fill"
             ) {
                 // ending the recording will also remove the `currentRecording`
                 playbackManager.eject()
+                currentPage = .cupboard
             }
-            .frame(width: controlsWidth, height: controlsHeight)
+            .frame(width: controlsWidth, height: controlsWidth)
         }
-        .padding([.vertical, .trailing], controlsMargins)
-        .padding(.top, volumeButtonsCenterOffset - controlsTotalHeight/2)
+        .padding(.all, controlsMargins)
+        .background {
+            RoundedRectangle(cornerRadius: controlsRadius+controlsMargins)
+                .fill(Color(red: 0.655, green: 0.631, blue: 0.624))
+                .brightness(-0.2)
+        }
     }
 
     @ViewBuilder
@@ -145,7 +153,7 @@ struct TapePlayerView: View {
         HStack(spacing: 0) {
             Rectangle()
                 .fill(Color.black)
-                .padding(.leading, -10)
+                .padding(.trailing, -10)
                 .opacity(0.1)
                 .zIndex(-1)
 
@@ -163,6 +171,11 @@ struct TapePlayerView: View {
                             }
                             .opacity(0.4)
                             .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .overlay {
+                                Text("Load a tape from\nthe cupboard")
+                                    .multilineTextAlignment(.center)
+                                    .foregroundStyle(.black)
+                            }
                     }
                     .scaleEffect(x: scale, y: scale)
 

@@ -205,6 +205,8 @@ class AudioPlayback: NSObject {
 
 extension AudioPlayback: AVAudioPlayerDelegate {
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
-        isPlaying = false
+        withAnimation {
+            isPlaying = false
+        }
     }
 }
