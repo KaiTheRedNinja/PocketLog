@@ -55,7 +55,7 @@ struct TapeRecorderView: View {
                         Spacer()
 
                         // the casette player looking thing
-                        casetteView
+                        cassetteView
                     }
 
                     // the duration "LCD"
@@ -145,33 +145,136 @@ struct TapeRecorderView: View {
         .padding(.top, volumeButtonsCenterOffset - controlsTotalHeight/2)
     }
 
-    var casetteView: some View {
+    var cassetteView: some View {
         HStack(spacing: 0) {
             ZStack {
-                // TODO: improve this casette player
-                VStack {
-                    Spacer()
-                    Circle()
-                        .frame(width: 50, height: 50)
-                    Spacer()
-                    Circle()
-                        .frame(width: 50, height: 50)
-                    Spacer()
-                }
-                .offset(x: audioManager.currentRecording == nil ? 400 : 0)
-                .animation(.easeInOut, value: audioManager.currentRecording == nil)
+                // NOTE: this cassette is actually horizontal in orientation, just rotated 90 degrees to face the correct way.
+                ZStack {
+                    // background
+                    Color(white: 0.3)
 
-                Rectangle()
-                    .fill(Color.black)
-                    .overlay {
-                        Rectangle()
-                            .fill(Color.black)
-                            .opacity(0.1)
-                            .padding(10)
+                    // screws
+                    let screw = Circle().fill(Color(white: 0.2))
+                        .frame(width: 16, height: 16)
+                        .overlay {
+                            Rectangle().fill(Color(white: 0.1)).frame(width: 4)
+                            Rectangle().fill(Color(white: 0.1)).frame(height: 4)
+                        }
+                    VStack {
+                        HStack {
+                            screw
+                            Spacer()
+                            screw
+                        }
+                        Spacer()
+                        HStack {
+                            screw
+                            Spacer()
+                            screw
+                        }
                     }
-                    .opacity(0.4)
-                    .frame(width: 240)
+                    .padding(4)
+
+                    // main body
+                    VStack(spacing: 12) {
+                        VStack {
+                            Spacer()
+                                .frame(height: 40)
+
+                            Rectangle()
+                                .fill(Color.black)
+                                .frame(height: 4)
+
+                            RoundedRectangle(cornerRadius: 5)
+                                .fill(Color.black)
+                                .frame(height: 60)
+                                .overlay {
+                                    HStack(spacing: 10) {
+                                        Circle()
+                                            .fill(Color(white: 0.7))
+                                            .background {
+                                                Circle()
+                                                    .fill(Color(white: 0.1))
+                                                    .frame(width: 160, height: 160)
+                                                Circle()
+                                                    .fill(.white)
+                                                    .frame(width: 80, height: 80)
+                                            }
+
+                                        Spacer()
+
+                                        Circle()
+                                            .fill(Color(white: 0.7))
+                                            .background {
+                                                Circle()
+                                                    .fill(Color(white: 0.1))
+                                                    .frame(width: 160, height: 160)
+                                                Circle()
+                                                    .fill(.white)
+                                                    .frame(width: 80, height: 80)
+                                            }
+                                    }
+                                    .background {
+                                        Color(white: 0.4)
+                                    }
+                                    .mask {
+                                        HStack(spacing: 10) {
+                                            Circle()
+                                                .fill(.white)
+
+                                            Rectangle()
+                                                .fill(.white)
+
+                                            Circle()
+                                                .fill(.white)
+                                        }
+                                    }
+                                    .padding(10)
+                                }
+                                .padding(.horizontal, 50)
+                                .padding(.vertical, 15)
+
+                            Spacer()
+
+                            Rectangle()
+                                .fill(Color.green)
+                                .frame(height: 10)
+                        }
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                        .background {
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(Color(red: 0.890, green: 0.867, blue: 0.832))
+                        }
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 4)
+                                .stroke(Color.black, lineWidth: 4)
+                        }
+
+                        Trapezium(deltaWidth: 10)
+                            .stroke(Color.black, lineWidth: 4)
+                            .frame(height: 55)
+                            .padding(.horizontal, 40)
+                            .padding(.bottom, -2)
+                    }
+                    .padding([.horizontal, .top], 24)
+                }
+                .frame(width: controlsTotalHeight - controlsMargins*2, height: 240)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .rotationEffect(.degrees(90), anchor: .center)
+//                .offset(x: audioManager.currentRecording == nil ? 400 : 0)
+//                .animation(.easeInOut, value: audioManager.currentRecording == nil)
+
+//                Rectangle()
+//                    .fill(Color.black)
+//                    .overlay {
+//                        Rectangle()
+//                            .fill(Color.black)
+//                            .opacity(0.1)
+//                            .padding(10)
+//                    }
+//                    .opacity(0.4)
             }
+            .frame(width: 240)
 
             Rectangle()
                 .fill(Color.black)
@@ -304,5 +407,52 @@ struct TapeButtonView: View {
                     onRelease()
                 }
             }
+    }
+}
+
+struct Trapezium: Shape {
+    /// Bottom width minus top width
+    var deltaWidth: CGFloat
+
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: .init(x: rect.minX + max(deltaWidth, 0), y: rect.minY))
+        path.addLine(to: .init(x: rect.maxX - max(deltaWidth, 0), y: rect.minY))
+        path.addLine(to: .init(x: rect.maxX - max(-deltaWidth, 0), y: rect.maxY))
+        path.addLine(to: .init(x: rect.minX + max(-deltaWidth, 0), y: rect.maxY))
+        path.closeSubpath()
+        return path
+    }
+}
+
+struct CircularTickers: Shape {
+    /// Number of tickers
+    var count: Int
+    /// Length of tickers
+    var length: CGFloat
+
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        let outerRadius = min(rect.width, rect.height)/2
+        let innerRadius = outerRadius - length
+        let angleSegmentRad = CGFloat.pi * 2 / CGFloat(count)
+
+        for index in 0..<count {
+            let angle = angleSegmentRad * CGFloat(index)
+            path.move(
+                to: .init(
+                    x: outerRadius * sin(angle),
+                    y: outerRadius * cos(angle)
+                )
+            )
+            path.addLine(
+                to: .init(
+                    x: innerRadius * sin(angle),
+                    y: innerRadius * cos(angle)
+                )
+            )
+        }
+
+        return path
     }
 }
