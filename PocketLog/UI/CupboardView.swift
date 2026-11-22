@@ -95,7 +95,6 @@ struct CupboardView: View {
                                 .frame(height: 5)
 
                             casette(for: record)
-                            .frame(height: 60)
                         }
                         .padding(.horizontal, 35)
                     }
@@ -161,7 +160,10 @@ struct CupboardView: View {
 //        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
+    @ViewBuilder
     func casette(for record: Recording) -> some View {
+        let screenSize = (UIApplication.shared.connectedScenes.first as? UIWindowScene)?.screen.bounds.size ?? .zero
+
         ZStack {
             Color.gray
             HStack(spacing: 0) {
@@ -185,6 +187,25 @@ struct CupboardView: View {
                     }
             }
             .padding(8)
+        }
+        .frame(height: 60)
+        .overlay(alignment: .bottom) {
+            GeometryReader { geom in
+                let frame = geom.frame(in: .global)
+                let offsetFromCenter = frame.minY - screenSize.height / 2
+
+                if offsetFromCenter > 0 {
+                    CassetteView()
+                        .trapezoidEffect(
+                            topWidth: frame.width,
+                            bottomWidth: frame.width,
+                            topY: 0,
+                            bottomY: frame.height,
+                            centerX: frame.width / 2
+                        )
+//                        .offset(y: -60)
+                }
+            }
         }
     }
 
