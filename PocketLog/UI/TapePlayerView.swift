@@ -41,16 +41,12 @@ struct TapePlayerView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
 
             VStack(spacing: 12) {
-                HStack(spacing: 0) {
-                    // controls
-                    controlsView
+                // the casette player looking thing
+                cassetteView
+                    .zIndex(100)
 
-                    Spacer()
-
-                    // the casette player looking thing
-                    cassetteView
-                }
-                .zIndex(100)
+//                // controls
+//                controlsView
 
                 // the duration "LCD"
                 durationView
@@ -97,11 +93,6 @@ struct TapePlayerView: View {
             RoundedRectangle(cornerRadius: 44)
                 .fill(fillGradient)
                 .padding(20)
-                .reverseMask(alignment: .topLeading) {
-                    UnevenRoundedRectangle(cornerRadii: .init(bottomTrailing: controlsRadius+controlsMargins, topTrailing: controlsRadius+controlsMargins))
-                        .frame(width: controlsWidth + 10, height: controlsTotalHeight)
-                        .padding(.top, volumeButtonsCenterOffset - controlsTotalHeight/2)
-                }
         }
     }
 
@@ -146,13 +137,21 @@ struct TapePlayerView: View {
         .padding(.top, volumeButtonsCenterOffset - controlsTotalHeight/2)
     }
 
+    @ViewBuilder
     var cassetteView: some View {
+        let screenSize = (UIApplication.shared.connectedScenes.first as? UIWindowScene)?.screen.bounds.size ?? .zero
+        let scale = (screenSize.width - 80) / cassetteWidth
+
         HStack(spacing: 0) {
+            Rectangle()
+                .fill(Color.black)
+                .padding(.leading, -10)
+                .opacity(0.1)
+                .zIndex(-1)
+
             ZStack {
-                // NOTE: this cassette is actually horizontal in orientation, just rotated 90 degrees to face the correct way.
                 CassetteView(phase: duration)
-                    .rotationEffect(.degrees(90), anchor: .center)
-                    .offset(x: playbackManager.player == nil ? 400 : 0)
+                    .offset(x: playbackManager.player == nil ? -500 : 0)
                     .background {
                         Rectangle()
                             .fill(Color.black)
@@ -163,14 +162,15 @@ struct TapePlayerView: View {
                                     .padding(10)
                             }
                             .opacity(0.4)
-                            .frame(width: cassetteHeight, height: cassetteWidth)
                             .clipShape(RoundedRectangle(cornerRadius: 10))
                     }
+                    .scaleEffect(x: scale, y: scale)
 
                 RoundedRectangle(cornerRadius: 10)
                     .fill(Color(white: 0.6))
                     .stroke(Color(white: 0.4), lineWidth: 2)
                     .padding(1)
+                    .frame(width: cassetteWidth * scale, height: cassetteHeight * scale)
                     .reverseMask {
                         Rectangle()
                             .padding(40)
@@ -180,38 +180,25 @@ struct TapePlayerView: View {
                             .stroke(Color(white: 0.4), lineWidth: 2)
                             .padding(40)
                     }
-                    .frame(width: cassetteHeight, height: cassetteWidth)
                     .rotation3DEffect(
-                        .degrees(playbackManager.player == nil ? -45 : 0),
+                        .degrees(playbackManager.player == nil ? 45 : 0),
                         axis: (x: 0, y: 1, z: 0),
-                        anchor: .leading,
-                        perspective: 0.5
+                        anchor: .trailing,
+                        perspective: 0.3
                     )
             }
+            .frame(width: cassetteWidth * scale, height: cassetteHeight * scale)
             .animation(.easeInOut, value: playbackManager.player == nil)
-            .frame(width: cassetteHeight)
 
             Rectangle()
-                .fill(Color.black)
-                .padding(.leading, -10)
-                .opacity(0.1)
-                .frame(width: 40)
-                .zIndex(-1)
+                .fill(Color.clear)
         }
-        .frame(height: controlsTotalHeight - controlsMargins*2)
+        .frame(height: cassetteHeight * scale)
         .padding(.top, volumeButtonsCenterOffset - controlsTotalHeight/2 + controlsMargins)
     }
 
     @ViewBuilder
     var durationView: some View {
-        // whether its recording or not
-        let recordingStr = if playbackManager.player == nil {
-            "No tape"
-        } else if playbackManager.isPlaying {
-            "Playing"
-        } else {
-            "Paused"
-        }
         // the duration
         let durationStr = [
             String(format: "%02d", Int(duration / 3600)),

@@ -5,7 +5,7 @@ struct ContentView: View {
     @State var audioManager = AudioManager()
     @State var pastRecordsManager = PastRecordsManager()
 
-    @State var currentPage: Page = .cupboard
+    @State var currentPage: Page = .player
     @State var currentlyPlaying: Recording? = nil
 
     var body: some View {
