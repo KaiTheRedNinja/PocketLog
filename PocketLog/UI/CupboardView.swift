@@ -74,7 +74,7 @@ struct CupboardView: View {
 
                         VStack(spacing: 0) {
                             Spacer()
-                                .frame(height: 5)
+                                .frame(height: 10)
                             if let showBarrier {
                                 Color.brown
                                     .frame(height: 40)
@@ -92,7 +92,7 @@ struct CupboardView: View {
                                     .padding(.horizontal, -10)
                             }
                             Spacer()
-                                .frame(height: 5)
+                                .frame(height: 10)
 
                             casette(for: record)
                         }
@@ -196,15 +196,35 @@ struct CupboardView: View {
 
                 if offsetFromCenter > 0 {
                     CassetteView()
-                        .trapezoidEffect(
-                            topWidth: frame.width,
-                            bottomWidth: frame.width,
-                            topY: 0,
-                            bottomY: frame.height,
-                            centerX: frame.width / 2
-                        )
-//                        .offset(y: -60)
+                        .scaleEffect(x: frame.width/cassetteWidth, y: 1, anchor: .bottom)
+                        .frame(width: frame.width, height: frame.height, alignment: .bottom)
+                        .rotation3DEffect(.degrees(25), axis: (x: 1, y: 0, z: 0), anchor: .bottom)
+                        .scaleEffect(y: offsetFromCenter * 0.2 / cassetteHeight, anchor: .bottom)
+                        .offset(y: -60)
                 }
+            }
+            .mask {
+                Rectangle()
+                    .padding(-10)
+            }
+        }
+        .overlay(alignment: .top) {
+            GeometryReader { geom in
+                let frame = geom.frame(in: .global)
+                let offsetFromCenter = frame.minY - screenSize.height / 2
+
+                if offsetFromCenter < 0 {
+                    CassetteView()
+                        .scaleEffect(x: frame.width/cassetteWidth, y: 1, anchor: .top)
+                        .frame(width: frame.width, height: frame.height, alignment: .top)
+                        .rotation3DEffect(.degrees(-25), axis: (x: 1, y: 0, z: 0), anchor: .top)
+                        .scaleEffect(y: -offsetFromCenter * 0.2 / cassetteHeight, anchor: .top)
+                        .offset(y: 60)
+                }
+            }
+            .mask {
+                Rectangle()
+                    .padding(-10)
             }
         }
     }

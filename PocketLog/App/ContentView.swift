@@ -8,49 +8,48 @@ struct ContentView: View {
     @State var currentPage: Page = .cupboard
 
     var body: some View {
-        TrapezoidTestView()
-//        GeometryReader { geom in
-//            ZStack {
-//                TapeRecorderView(audioManager: audioManager)
-//                    .offset(x: currentPage == .recorder ? 0 : -geom.size.width)
-//
-//                CupboardView(audioManager: audioManager, pastRecordsManager: pastRecordsManager)
-//                    .offset(x: currentPage == .recorder ? geom.size.width : (currentPage == .player ? -geom.size.width : 0))
-//
-//                Text("Player")
-//                    .offset(x: currentPage == .player ? 0 : geom.size.width)
-//            }
-//            .overlay(alignment: .bottom) {
-//                // TODO: make these buttons look more like tassles
-//                HStack {
-//                    VStack(alignment: .leading) {
-//                        switch currentPage {
-//                        case .recorder: EmptyView()
-//                        case .cupboard:
-//                            tagButton(page: .recorder)
-//                        case .player:
-//                            tagButton(page: .cupboard)
-//                            tagButton(page: .recorder)
-//                        }
-//                    }
-//                    Spacer()
-//                    VStack(alignment: .trailing) {
-//                        switch currentPage {
-//                        case .recorder:
-//                            tagButton(page: .cupboard)
-//                            tagButton(page: .player) // NOTE: hide if no audio being played
-//                        case .cupboard:
-//                            tagButton(page: .player)
-//                        case .player: EmptyView()
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//        .animation(.easeInOut, value: currentPage)
-//        .task {
-//            await audioManager.requestRecordingPermission()
-//        }
+        GeometryReader { geom in
+            ZStack {
+                TapeRecorderView(audioManager: audioManager)
+                    .offset(x: currentPage == .recorder ? 0 : -geom.size.width)
+
+                CupboardView(audioManager: audioManager, pastRecordsManager: pastRecordsManager)
+                    .offset(x: currentPage == .recorder ? geom.size.width : (currentPage == .player ? -geom.size.width : 0))
+
+                Text("Player")
+                    .offset(x: currentPage == .player ? 0 : geom.size.width)
+            }
+            .overlay(alignment: .bottom) {
+                // TODO: make these buttons look more like tassles
+                HStack {
+                    VStack(alignment: .leading) {
+                        switch currentPage {
+                        case .recorder: EmptyView()
+                        case .cupboard:
+                            tagButton(page: .recorder)
+                        case .player:
+                            tagButton(page: .cupboard)
+                            tagButton(page: .recorder)
+                        }
+                    }
+                    Spacer()
+                    VStack(alignment: .trailing) {
+                        switch currentPage {
+                        case .recorder:
+                            tagButton(page: .cupboard)
+                            tagButton(page: .player) // NOTE: hide if no audio being played
+                        case .cupboard:
+                            tagButton(page: .player)
+                        case .player: EmptyView()
+                        }
+                    }
+                }
+            }
+        }
+        .animation(.easeInOut, value: currentPage)
+        .task {
+            await audioManager.requestRecordingPermission()
+        }
     }
 
     func tagButton(page: Page) -> some View {
