@@ -252,23 +252,71 @@ struct CupboardView: View {
     }
 
     func cassetteOverlay(for record: Recording) -> some View {
-        CassetteView(text: record.name)
-            .overlay(alignment: .bottom) {
-                Text("Tap to play")
-                    .bold()
-                    .foregroundStyle(.white)
-                    .padding(10)
-            }
-            .onTapGesture {
-                // TODO: play the recording
-                print("Playing record...")
-            }
-            .onChange(of: offset) { _, _ in
-                withAnimation {
-                    selectedRecording = nil
+        ZStack {
+            Color.black.opacity(0.5)
+                .onTapGesture {
+                    withAnimation {
+                        selectedRecording = nil
+                    }
+                }
+                .ignoresSafeArea()
+
+            VStack(spacing: 20) {
+                CassetteView(text: record.name)
+                    .onTapGesture {
+                        withAnimation {
+                            selectedRecording = nil
+                        }
+                    }
+                    .onChange(of: offset) { _, _ in
+                        withAnimation {
+                            selectedRecording = nil
+                        }
+                    }
+                    .matchedGeometryEffect(id: "cassette_\(record.fileName)", in: namespace)
+
+                HStack(spacing: 10) {
+                    Button {
+                        // TODO: play the recording
+                        print("Playing record...")
+                    } label: {
+                        Image(systemName: "play")
+                            .font(.title)
+                            .foregroundStyle(.black)
+                    }
+                    .padding(.horizontal, 10)
+
+                    Button {
+                        // TODO: share sheet
+                        print("Sharing....")
+                    } label: {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.title)
+                            .foregroundStyle(.black)
+                    }
+                    .padding(.horizontal, 10)
+
+                    Button {
+                        withAnimation {
+                            selectedRecording = nil
+                        }
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.title)
+                            .foregroundStyle(.black)
+                    }
+                    .padding(.horizontal, 10)
+                }
+                .buttonStyle(.plain)
+                .padding(.vertical, 20)
+                .padding(.horizontal, 40)
+                .background {
+                    RibbonShape(ribbonInsetAbsolute: 10)
+                        .fill(Color(red: 0.937, green: 0.917, blue: 0.886))
+                        .shadow(radius: 10)
                 }
             }
-            .matchedGeometryEffect(id: "cassette_\(record.fileName)", in: namespace)
+        }
     }
 
     func refresh() {

@@ -104,11 +104,22 @@ extension View {
 
 struct RibbonShape: Shape {
     /// The inset of the ribbon, relative to the height of the ribbon. Defaults to 0.5.
-    var ribbonInset: CGFloat = 0.5
+    var ribbonInset: CGFloat?
+    /// The inset of the ribbon, as an absolute value.
+    var ribbonInsetAbsolute: CGFloat?
+
+    init(ribbonInset: CGFloat) {
+        self.ribbonInset = ribbonInset
+        self.ribbonInsetAbsolute = nil
+    }
+    init(ribbonInsetAbsolute: CGFloat) {
+        self.ribbonInset = nil
+        self.ribbonInsetAbsolute = ribbonInsetAbsolute
+    }
 
     func path(in rect: CGRect) -> Path {
         var path = Path()
-        let inset = rect.height * ribbonInset
+        let inset = if let ribbonInset { rect.height * ribbonInset } else { ribbonInsetAbsolute! }
         path.move(to: rect.origin)
         // right side
         path.addLine(to: .init(x: rect.maxX, y: rect.minY))
