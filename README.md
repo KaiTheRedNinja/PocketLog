@@ -10,16 +10,16 @@ Could the voice memos app do the same thing? Probably. But it doesn't feel as co
 Functionality
 - [x] Record audio
 - [ ] Volume button controls for play/stop
-- [ ] Play back audio
+- [x] Play back audio
 - [x] Save and label multiple tracks
 - [x] Export audio
 
 UI:
-- [ ] Rotating tape
+- [x] Rotating tape
 - [ ] Hold the tape to remove it (make use of drag-and-drop)
-- [ ] LCD-like duration display
-- [ ] Skeomorphic play/pause/skip/record buttons
-- [ ] Handwriting-like labels
+- [x] LCD-like duration display
+- [x] Skeomorphic play/pause/skip/record buttons
+- [x] Handwriting-like labels
 - [ ] Distinct tactile feedback on
   - [ ] Start/restart recording
   - [ ] Pause recording

@@ -8,11 +8,13 @@
 
 /* Begin PBXBuildFile section */
 		931B5A0C30AB0A8C0099FF29 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 931B5A0B30AB0A8C0099FF29 /* README.md */; };
+		93F7D78430B323AC0009E5F1 /* PocketLog_Icon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 93F7D78330B323AC0009E5F1 /* PocketLog_Icon.icon */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		000000000000000000000120 /* PocketLog.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PocketLog.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		931B5A0B30AB0A8C0099FF29 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		93F7D78330B323AC0009E5F1 /* PocketLog_Icon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = PocketLog_Icon.icon; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -36,6 +38,7 @@
 			isa = PBXGroup;
 			children = (
 				931B5A0B30AB0A8C0099FF29 /* README.md */,
+				93F7D78330B323AC0009E5F1 /* PocketLog_Icon.icon */,
 				000000000000000000000010 /* PocketLog */,
 				000000000000000000000020 /* Products */,
 			);
@@ -109,6 +112,7 @@
 			isa = PBXResourcesBuildPhase;
 			files = (
 				931B5A0C30AB0A8C0099FF29 /* README.md in Resources */,
+				93F7D78430B323AC0009E5F1 /* PocketLog_Icon.icon in Resources */,
 			);
 		};
 /* End PBXResourcesBuildPhase section */
@@ -257,6 +261,8 @@
 		000000000000000111000000 /* Debug configuration for PBXNativeTarget "PocketLog" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = PocketLog_Icon;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = N9ANZ94TFN;
@@ -297,6 +303,8 @@
 		000000000000000112000000 /* Release configuration for PBXNativeTarget "PocketLog" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = PocketLog_Icon;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = N9ANZ94TFN;
