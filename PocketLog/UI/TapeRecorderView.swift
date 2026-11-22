@@ -111,7 +111,8 @@ struct TapeRecorderView: View {
                 cornerRadii: .init(bottomTrailing: 0, topTrailing: controlsRadius),
                 scaleAnchor: .bottomLeading,
                 fillColor: .red,
-                icon: "record.circle"
+                icon: "record.circle",
+                activeLed: true
             ) {
                 audioManager.beginOrResumeRecording()
             }
@@ -185,11 +186,11 @@ struct TapeRecorderView: View {
     var durationView: some View {
         // whether its recording or not
         let recordingStr = if audioManager.audioRecorder == nil {
-            "No tape    | "
+            "No tape"
         } else if audioManager.isRecording {
-            "Recording  | "
+            "Recording"
         } else {
-            "Paused     | "
+            "Paused"
         }
         // the duration
         let durationStr = [
@@ -198,18 +199,24 @@ struct TapeRecorderView: View {
             String(format: "%02d", Int(duration.truncatingRemainder(dividingBy: 60)))
         ].joined(separator: ":") + "." + String(format: "%01d", Int((duration * 10).truncatingRemainder(dividingBy: 10.0)))
 
-        Text(recordingStr + durationStr)
-            .monospaced()
-            .lineLimit(1)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 10)
-            .frame(height: 40, alignment: .leading)
-            .background {
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(Color(white: 0.4))
-                    .shadow(radius: 6)
-            }
-            .padding(.horizontal, 40)
+        HStack {
+            Text(recordingStr)
+            Spacer()
+            Text(durationStr)
+        }
+        .foregroundStyle(.black)
+        .monospaced()
+        .bold()
+        .lineLimit(1)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 10)
+        .frame(height: 40, alignment: .leading)
+        .background {
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color(white: 0.45))
+                .shadow(radius: 6)
+        }
+        .padding(.horizontal, 40)
     }
 
     var grillsView: some View {
@@ -243,6 +250,7 @@ struct TapeButtonView: View {
     var scaleAnchor: UnitPoint = .center
     var fillColor: Color
     var icon: String?
+    var activeLed: Bool = false
 
     var onRelease: () -> Void
 
@@ -259,6 +267,14 @@ struct TapeButtonView: View {
                 UnevenRoundedRectangle(cornerRadii: cornerRadii)
                     .fill(fillColor)
                     .brightness(brightness)
+                    .overlay {
+                        if isDepressed && activeLed {
+                            Circle()
+                                .fill(fillColor)
+                                .saturation(2.0)
+                                .blur(radius: 20)
+                        }
+                    }
                     .overlay {
                         if let icon {
                             Image(systemName: icon)
