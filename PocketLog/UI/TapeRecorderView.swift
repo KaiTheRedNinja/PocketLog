@@ -60,6 +60,7 @@ struct TapeRecorderView: View {
                         // the casette player looking thing
                         cassetteView
                     }
+                    .zIndex(100)
 
                     // the duration "LCD"
                     durationView
@@ -154,25 +155,51 @@ struct TapeRecorderView: View {
                 // NOTE: this cassette is actually horizontal in orientation, just rotated 90 degrees to face the correct way.
                 CassetteView(phase: duration)
                     .rotationEffect(.degrees(90), anchor: .center)
-//                    .offset(x: audioManager.currentRecording == nil ? 400 : 0)
-//                    .animation(.easeInOut, value: audioManager.currentRecording == nil)
+                    .offset(x: audioManager.currentRecording == nil ? 400 : 0)
+                    .background {
+                        Rectangle()
+                            .fill(Color.black)
+                            .overlay {
+                                Rectangle()
+                                    .fill(Color.black)
+                                    .opacity(0.1)
+                                    .padding(10)
+                            }
+                            .opacity(0.4)
+                            .frame(width: cassetteHeight, height: cassetteWidth)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                    }
 
-//                Rectangle()
-//                    .fill(Color.black)
-//                    .overlay {
-//                        Rectangle()
-//                            .fill(Color.black)
-//                            .opacity(0.1)
-//                            .padding(10)
-//                    }
-//                    .opacity(0.4)
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color(white: 0.6))
+                    .stroke(Color(white: 0.4), lineWidth: 2)
+                    .padding(1)
+                    .reverseMask {
+                        Rectangle()
+                            .padding(40)
+                    }
+                    .overlay {
+                        Rectangle()
+                            .stroke(Color(white: 0.4), lineWidth: 2)
+                            .padding(40)
+                    }
+                    .frame(width: cassetteHeight, height: cassetteWidth)
+                    .rotation3DEffect(
+                        .degrees(audioManager.currentRecording == nil ? -45 : 0),
+                        axis: (x: 0, y: 1, z: 0),
+                        anchor: .leading,
+                        perspective: 0.5
+                    )
             }
-            .frame(width: 240)
+            .animation(.easeInOut, value: audioManager.currentRecording == nil)
+            .frame(width: cassetteHeight)
 
             Rectangle()
                 .fill(Color.black)
+                .padding(.leading, -10)
                 .opacity(0.1)
                 .frame(width: 40)
+                .zIndex(-1)
         }
         .frame(height: controlsTotalHeight - controlsMargins*2)
         .padding(.top, volumeButtonsCenterOffset - controlsTotalHeight/2 + controlsMargins)

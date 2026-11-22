@@ -127,7 +127,7 @@ struct CassetteView: View {
             }
             .padding([.horizontal, .top], 24)
         }
-        .frame(width: controlsTotalHeight - controlsMargins*2, height: 240)
+        .frame(width: cassetteWidth, height: cassetteHeight)
         .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 }
