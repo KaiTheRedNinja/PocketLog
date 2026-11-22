@@ -68,6 +68,7 @@ struct TapePlayerView: View {
                 playbackManager.load(recording: newValue, playAfterLoad: true)
             } else {
                 playbackManager.eject()
+                recording = nil
                 currentPage = .cupboard
             }
         }
@@ -133,6 +134,7 @@ struct TapePlayerView: View {
             ) {
                 // ending the recording will also remove the `currentRecording`
                 playbackManager.eject()
+                recording = nil
                 currentPage = .cupboard
             }
             .frame(width: controlsWidth, height: controlsWidth)
