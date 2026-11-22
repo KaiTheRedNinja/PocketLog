@@ -103,18 +103,18 @@ enum DateCategory: Equatable {
     /// Recording was made N years ago, where `1 <= N`
     case yearsAgo(Int)
 
-    var description: String {
+    var description: LocalizedStringKey {
         switch self {
         case .today:
             "Today"
         case .daysAgo(let int):
-            "\(int) days ago"
+            "^[\(int) day](inflect:true) ago"
         case .weeksAgo(let int):
-            "\(int) weeks ago"
+            "^[\(int) week](inflect:true) ago"
         case .monthsAgo(let int):
-            "\(int) months ago"
+            "^[\(int) month](inflect:true) ago"
         case .yearsAgo(let int):
-            "\(int) years ago"
+            "^[\(int) year](inflect:true) ago"
         }
     }
 }
@@ -130,7 +130,7 @@ extension Date {
 
         if startOfRef == startOfSelf { return .today }
 
-        let components = calendar.dateComponents([.day, .weekOfYear, .month, .year], from: self, to: reference)
+        let components = calendar.dateComponents([.day, .weekOfYear, .month, .year], from: startOfSelf, to: startOfRef)
 
         let day = components.day ?? 0
         let weekOfYear = components.weekOfYear ?? 0

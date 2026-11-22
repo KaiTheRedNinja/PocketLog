@@ -79,9 +79,10 @@ struct CupboardView: View {
                                 Color.brown
                                     .frame(height: 40)
                                     .brightness(-0.3)
-                                    .overlay {
+                                    .overlay(alignment: .leading) {
                                         Text(showBarrier.description)
                                             .foregroundStyle(.white)
+                                            .padding(.horizontal, 10)
                                     }
                                     .padding(.horizontal, -10)
                             } else {
