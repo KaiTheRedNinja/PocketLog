@@ -1,6 +1,8 @@
 # PocketLog
 A tape recorder but in your phone
 
+<img width="603" height="1311" alt="PocketLog Example" src="https://github.com/user-attachments/assets/e5ce17f4-9157-4bc3-9cd2-af106c935d4a" />
+
 ## What is it?
 An audio recorder app that takes inspiration from old tape recorders, shelves, and players. It isn't really meant to be useful, more just fun :P
 
