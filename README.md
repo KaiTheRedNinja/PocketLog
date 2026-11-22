@@ -1,10 +1,22 @@
 # PocketLog
 A tape recorder but in your phone
 
-## Why?
-Sometimes I just want to feel whimsical. Like those probably historically inacurate movies where people pull out a tape recorder and record their thoughs.
+## What is it?
+An audio recorder app that takes inspiration from old tape recorders, shelves, and players. It isn't really meant to be useful, more just fun :P
 
-Could the voice memos app do the same thing? Probably. But it doesn't feel as cool, and needs you to actually look at the screen to do it. I want something that feels closer to an actual tape recorder in your pocket (even if it doesn't resemble any tape recorder that actually existed IRL), and importantly one that can be run without touching the screen
+## How to try it out
+Download it on [TestFlight](https://testflight.apple.com/join/bERPzPy7)
+
+## Why?
+Sometimes I just want to feel whimsical. Like those probably historically inacurate movies where people pull out a tape recorder and record their thoughs (or others....)
+
+Could the voice memos app do the same thing? Probably. But it doesn't feel as cool, and needs you to actually look at the screen to do it. I want something that feels closer to an actual tape recorder in your pocket (even if it doesn't resemble any tape recorder that actually existed IRL), and importantly one that can be run without touching the screen.
+
+## What Next
+As you can tell by the many empty checkboxes in Goals, there are a lot of things left to do. Functionality wise the app is nearly complete, I just want to add more polish to it to make it actually look and feel good:
+- Tactile feedback
+- More accurate looking UI
+- Ability to operate without looking, including using the volume buttons as triggers
 
 ## Goals
 Functionality
