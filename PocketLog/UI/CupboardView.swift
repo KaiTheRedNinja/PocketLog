@@ -15,6 +15,7 @@ struct CupboardView: View {
     @State private var offset = CGFloat.zero
 
     @State var selectedRecording: Recording?
+    @Binding var currentlyPlaying: Recording?
 
     @Namespace var namespace
 
@@ -280,8 +281,7 @@ struct CupboardView: View {
 
                 HStack(spacing: 10) {
                     Button {
-                        // TODO: play the recording
-                        print("Playing record...")
+                        currentlyPlaying = record
                     } label: {
                         Image(systemName: "play")
                             .font(.title)

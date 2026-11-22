@@ -6,6 +6,7 @@ struct ContentView: View {
     @State var pastRecordsManager = PastRecordsManager()
 
     @State var currentPage: Page = .cupboard
+    @State var currentlyPlaying: Recording? = nil
 
     var body: some View {
         GeometryReader { geom in
@@ -13,11 +14,16 @@ struct ContentView: View {
                 TapeRecorderView(audioManager: audioManager)
                     .offset(x: currentPage == .recorder ? 0 : -geom.size.width)
 
-                CupboardView(audioManager: audioManager, pastRecordsManager: pastRecordsManager)
+                CupboardView(audioManager: audioManager, pastRecordsManager: pastRecordsManager, currentlyPlaying: $currentlyPlaying)
                     .offset(x: currentPage == .recorder ? geom.size.width : (currentPage == .player ? -geom.size.width : 0))
 
-                Text("Player")
+                TapePlayerView(recording: $currentlyPlaying)
                     .offset(x: currentPage == .player ? 0 : geom.size.width)
+            }
+            .onChange(of: currentlyPlaying) { oldValue, newValue in
+                if newValue != nil {
+                    currentPage = .player
+                }
             }
             .overlay(alignment: .bottom) {
                 // TODO: make these buttons look more like tassles

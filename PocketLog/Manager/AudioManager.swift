@@ -126,3 +126,85 @@ class AudioManager: NSObject {
 
 extension AudioManager: AVAudioRecorderDelegate {
 }
+
+@Observable
+class AudioPlayback: NSObject {
+    var recording: Recording?
+    var isPlaying: Bool
+
+    @ObservationIgnored var recordingSession: AVAudioSession?
+    var player: AVAudioPlayer?
+
+    init(recording: Recording?) {
+        self.recording = recording
+        self.player = nil
+        self.isPlaying = false
+    }
+
+    func load(recording: Recording, playAfterLoad: Bool = false) {
+        self.recording = recording
+        let url = FileSystem.path(for: .recording(name: recording.fileName))
+
+        recordingSession = AVAudioSession.sharedInstance()
+        do {
+            // Set the audio session category and mode.
+            try recordingSession!.setCategory(.playAndRecord, mode: .default)
+        } catch {
+            print("Could not set category for recording session")
+        }
+
+        isPlaying = false
+        do {
+            player = try AVAudioPlayer(contentsOf: url)
+            guard let player else {
+                print("Could not create player")
+                return
+            }
+            player.volume = 1.0
+            player.delegate = self
+            recordingSession?.activate(options: []) { [weak self] success, error in
+                guard let self else { return }
+
+                guard success else {
+                    print("Audio session reactivation failed: \(String(describing: error))")
+                    eject()
+                    return
+                }
+
+                DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                    player.prepareToPlay()
+                    if playAfterLoad {
+                        self?.beginOrResume()
+                    }
+                    print("Recording prepped")
+                }
+            }
+        } catch {
+            print("Could not begin playing: \(error)")
+        }
+    }
+
+    func eject() {
+        recording = nil
+        player?.pause()
+        player = nil
+        isPlaying = false
+    }
+
+    func beginOrResume() {
+        guard let player else { return }
+        player.play()
+        isPlaying = true
+    }
+
+    func pause() {
+        player?.pause()
+        isPlaying = false
+    }
+}
+
+extension AudioPlayback: AVAudioPlayerDelegate {
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        isPlaying = false
+    }
+}
