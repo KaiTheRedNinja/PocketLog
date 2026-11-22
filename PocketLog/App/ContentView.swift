@@ -5,7 +5,7 @@ struct ContentView: View {
     @State var audioManager = AudioManager()
     @State var pastRecordsManager = PastRecordsManager()
 
-    @State var currentPage: Page = .cupboard
+    @State var currentPage: Page = .recorder
 
     var body: some View {
         GeometryReader { geom in
@@ -26,32 +26,20 @@ struct ContentView: View {
                         switch currentPage {
                         case .recorder: EmptyView()
                         case .cupboard:
-                            Button("Recorder") {
-                                currentPage = .recorder
-                            }
+                            tagButton(page: .recorder)
                         case .player:
-                            Button("Cupboard") {
-                                currentPage = .cupboard
-                            }
-                            Button("Recorder") {
-                                currentPage = .recorder
-                            }
+                            tagButton(page: .cupboard)
+                            tagButton(page: .recorder)
                         }
                     }
                     Spacer()
-                    VStack(alignment: .leading) {
+                    VStack(alignment: .trailing) {
                         switch currentPage {
                         case .recorder:
-                            Button("Cupboard") {
-                                currentPage = .cupboard
-                            }
-                            Button("Player") { // NOTE: hide if no audio being played
-                                currentPage = .player
-                            }
+                            tagButton(page: .cupboard)
+                            tagButton(page: .player) // NOTE: hide if no audio being played
                         case .cupboard:
-                            Button("Player") {
-                                currentPage = .player
-                            }
+                            tagButton(page: .player)
                         case .player: EmptyView()
                         }
                     }
@@ -63,12 +51,39 @@ struct ContentView: View {
             await audioManager.requestRecordingPermission()
         }
     }
+
+    func tagButton(page: Page) -> some View {
+        Button {
+            currentPage = page
+        } label: {
+            Text(page.name)
+                .font(.system(.title3, design: .serif).italic())
+                .foregroundStyle(.black)
+                .padding(.vertical, 5)
+                .padding(.horizontal, 20)
+                .background {
+                    RibbonShape(ribbonInset: 0.2)
+                        .fill(Color(red: 0.937, green: 0.917, blue: 0.886))
+                        .shadow(radius: 10)
+                }
+        }
+        .padding(.horizontal, -10)
+        .buttonStyle(.plain)
+    }
 }
 
 enum Page: Equatable {
     case recorder
     case cupboard
     case player
+
+    var name: String {
+        switch self {
+        case .recorder: "Recorder"
+        case .cupboard: "Cupboard"
+        case .player: "Player"
+        }
+    }
 }
 
 extension View {
@@ -84,5 +99,26 @@ extension View {
                         .blendMode(.destinationOut)
                 }
         }
+    }
+}
+
+struct RibbonShape: Shape {
+    /// The inset of the ribbon, relative to the height of the ribbon. Defaults to 0.5.
+    var ribbonInset: CGFloat = 0.5
+
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        let inset = rect.height * ribbonInset
+        path.move(to: rect.origin)
+        // right side
+        path.addLine(to: .init(x: rect.maxX, y: rect.minY))
+        path.addLine(to: .init(x: rect.maxX - inset, y: rect.midY))
+        path.addLine(to: .init(x: rect.maxX, y: rect.maxY))
+        // left side
+        path.addLine(to: .init(x: rect.minX, y: rect.maxY))
+        path.addLine(to: .init(x: rect.minX + inset, y: rect.midY))
+        path.addLine(to: .init(x: rect.minX, y: rect.minY))
+        path.closeSubpath()
+        return path
     }
 }
