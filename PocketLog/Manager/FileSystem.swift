@@ -41,8 +41,8 @@ enum FileSystem {
         let destinationUrl = exportsDirectory.appendingPathComponent(newName)
         // create the exports directory
         try FileManager.default.createDirectory(at: exportsDirectory, withIntermediateDirectories: true)
-        // remove anything that is already there
-        try FileManager.default.removeItem(at: destinationUrl)
+        // remove anything that is already there. If it fails, no issue, probably because the file wasn't there to begin with.
+        try? FileManager.default.removeItem(at: destinationUrl)
         // copy from file in file system to export directory
         try FileManager.default.copyItem(at: sourcePath, to: destinationUrl)
         // update the properties. This can fail without affecting the rest of the function

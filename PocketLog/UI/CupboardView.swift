@@ -137,6 +137,9 @@ struct CupboardView: View {
         .onChange(of: audioManager.currentRecording, initial: true) { _, _ in
             refresh()
         }
+        .sheet(item: $exportUrl) { url in
+            ShareView(activityItems: [url])
+        }
 //        List {
 //            Button("Reload records") {
 //                _ = Task {
@@ -287,8 +290,15 @@ struct CupboardView: View {
                     .padding(.horizontal, 10)
 
                     Button {
-                        // TODO: share sheet
-                        print("Sharing....")
+                        do {
+                            exportUrl = try FileSystem.export(
+                                file: .recording(name: record.fileName),
+                                newName: record.name + ".m4a"
+                            )
+                        } catch {
+                            print("Could not export: \(error)")
+                            exportUrl = nil
+                        }
                     } label: {
                         Image(systemName: "square.and.arrow.up")
                             .font(.title)
