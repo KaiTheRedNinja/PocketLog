@@ -14,6 +14,10 @@ struct CupboardView: View {
 
     @State private var offset = CGFloat.zero
 
+    @State var selectedRecording: Recording?
+
+    @Namespace var namespace
+
     var body: some View {
         ZStack {
             HStack(spacing: 0) {
@@ -74,7 +78,7 @@ struct CupboardView: View {
 
                         VStack(spacing: 0) {
                             Spacer()
-                                .frame(height: 10)
+                                .frame(height: 5)
                             if let showBarrier {
                                 Color.brown
                                     .frame(height: 40)
@@ -86,17 +90,34 @@ struct CupboardView: View {
                                     }
                                     .padding(.horizontal, -10)
                             } else {
-                                Color.brown
-                                    .frame(height: 10)
-                                    .brightness(-0.3)
-                                    .padding(.horizontal, -10)
+                                HStack {
+                                    Color.brown
+                                        .frame(width: 20, height: 10)
+                                        .brightness(-0.3)
+                                    Spacer()
+                                    Color.brown
+                                        .frame(width: 20, height: 10)
+                                        .brightness(-0.3)
+                                }
+                                .padding(.horizontal, -10)
                             }
                             Spacer()
-                                .frame(height: 10)
+                                .frame(height: 5)
 
-                            casette(for: record)
+                            if selectedRecording != record {
+                                casette(for: record)
+                                    .zIndex(-100)
+                            } else {
+                                Spacer()
+                                    .frame(height: 60)
+                            }
                         }
                         .padding(.horizontal, 35)
+                        .onTapGesture {
+                            withAnimation {
+                                selectedRecording = record
+                            }
+                        }
                     }
 
                     Spacer()
@@ -107,6 +128,10 @@ struct CupboardView: View {
             .onScrollGeometryChange(for: ScrollGeometry.self, of: { $0 }) { oldValue, newValue in
                 print("Offset: \(newValue.contentOffset.y) in \(newValue.containerSize)")
                 offset = newValue.contentOffset.y
+            }
+
+            if let selectedRecording {
+                cassetteOverlay(for: selectedRecording)
             }
         }
         .onChange(of: audioManager.currentRecording, initial: true) { _, _ in
@@ -189,44 +214,61 @@ struct CupboardView: View {
             .padding(8)
         }
         .frame(height: 60)
-        .overlay(alignment: .bottom) {
+        .background(alignment: .bottom) {
             GeometryReader { geom in
                 let frame = geom.frame(in: .global)
                 let offsetFromCenter = frame.minY - screenSize.height / 2
 
-                if offsetFromCenter > 0 {
-                    CassetteView()
-                        .scaleEffect(x: frame.width/cassetteWidth, y: 1, anchor: .bottom)
-                        .frame(width: frame.width, height: frame.height, alignment: .bottom)
-                        .rotation3DEffect(.degrees(25), axis: (x: 1, y: 0, z: 0), anchor: .bottom)
-                        .scaleEffect(y: offsetFromCenter * 0.2 / cassetteHeight, anchor: .bottom)
-                        .offset(y: -60)
-                }
+                CassetteView(text: record.name)
+                    .matchedGeometryEffect(id: "cassette_\(record.fileName)", in: namespace)
+                    .scaleEffect(x: frame.width/cassetteWidth, y: 1, anchor: .bottom)
+                    .frame(width: frame.width, height: frame.height, alignment: .bottom)
+                    .rotation3DEffect(.degrees(25), axis: (x: 1, y: 0, z: 0), anchor: .bottom)
+                    .scaleEffect(y: offsetFromCenter * 0.2 / cassetteHeight, anchor: .bottom)
+                    .offset(y: -60)
             }
             .mask {
                 Rectangle()
-                    .padding(-10)
+                    .padding(-20)
             }
         }
-        .overlay(alignment: .top) {
+        .background(alignment: .top) {
             GeometryReader { geom in
                 let frame = geom.frame(in: .global)
                 let offsetFromCenter = frame.minY - screenSize.height / 2
 
-                if offsetFromCenter < 0 {
-                    CassetteView()
-                        .scaleEffect(x: frame.width/cassetteWidth, y: 1, anchor: .top)
-                        .frame(width: frame.width, height: frame.height, alignment: .top)
-                        .rotation3DEffect(.degrees(-25), axis: (x: 1, y: 0, z: 0), anchor: .top)
-                        .scaleEffect(y: -offsetFromCenter * 0.2 / cassetteHeight, anchor: .top)
-                        .offset(y: 60)
-                }
+                CassetteView(text: record.name)
+                    .scaleEffect(x: frame.width/cassetteWidth, y: 1, anchor: .top)
+                    .frame(width: frame.width, height: frame.height, alignment: .top)
+                    .rotation3DEffect(.degrees(-25), axis: (x: 1, y: 0, z: 0), anchor: .top)
+                    .scaleEffect(y: -offsetFromCenter * 0.2 / cassetteHeight, anchor: .top)
+                    .offset(y: 60)
             }
             .mask {
                 Rectangle()
-                    .padding(-10)
+                    .padding(-20)
             }
         }
+    }
+
+    func cassetteOverlay(for record: Recording) -> some View {
+        CassetteView(text: record.name)
+            .overlay(alignment: .bottom) {
+                Text("Tap to play")
+                    .bold()
+                    .foregroundStyle(.white)
+                    .padding(10)
+            }
+            .onTapGesture {
+                // TODO: play the recording
+                print("Playing record...")
+            }
+            .onChange(of: offset) { _, _ in
+                withAnimation {
+                    selectedRecording = nil
+                }
+            }
+            .matchedGeometryEffect(id: "cassette_\(record.fileName)", in: namespace)
     }
 
     func refresh() {

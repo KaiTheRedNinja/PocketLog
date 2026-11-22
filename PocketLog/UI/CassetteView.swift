@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct CassetteView: View {
+    var text: String = ""
     var phase: CGFloat = 0
 
     var body: some View {
@@ -40,8 +41,13 @@ struct CassetteView: View {
             // main body
             VStack(spacing: 12) {
                 VStack {
-                    Spacer()
+                    Color.clear
                         .frame(height: 40)
+                        .overlay(alignment: .leading) {
+                            Text(text)
+                                .foregroundStyle(.black)
+                                .padding(.leading, 5)
+                        }
 
                     Rectangle()
                         .fill(Color.black)
